@@ -19,7 +19,6 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .systemOrange
-    
         didTappedAddItemButton()
         setupUI()
     }
@@ -30,11 +29,16 @@ class ViewController: UIViewController {
         addItemButton.addTarget(self, action: #selector(addItem), for: .touchUpInside)
     }
     
-    
     // MARK: - Actions
     @objc private func addItem() {
         let addItemVC = AddPlanViewController()
-        navigationController?.pushViewController(addItemVC, animated: true)
+        
+        if let sheet = addItemVC.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+            sheet.preferredCornerRadius = 25
+        }
+        present(addItemVC, animated: true)
     }
 }
 
@@ -68,4 +72,15 @@ extension ViewController {
 }
 
 
+// MARK: - 폰트 확인 메서드
+extension ViewController {
+    func printAllFonts() {
+        for family in UIFont.familyNames {
+            print("Font Family: \(family)")
+            for fontName in UIFont.fontNames(forFamilyName: family) {
+                print(" - \(fontName)")
+            }
+        }
+    }
 
+}

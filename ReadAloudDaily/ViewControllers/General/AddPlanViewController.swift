@@ -10,24 +10,23 @@ import UIKit
 class AddPlanViewController: UIViewController {
     
     
+    
     // MARK: - Life Cycle 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemOrange
+        view.backgroundColor = UIColor(named: "SheetBackgroundColor")
         
         setupBackButton()
-        
+        titleLabel()
     }
 }
 
 
-// MARK: - NavigationBar 설정
+// MARK: - 뒤로가기 버튼 설정
 extension AddPlanViewController {
     
     // MARK: - 뒤로가기 버튼 설정
     private func setupBackButton() {
-        
-        navigationItem.hidesBackButton = true
 
         let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .bold)
         let xmarkImage = UIImage(systemName: "xmark", withConfiguration: config)
@@ -43,9 +42,12 @@ extension AddPlanViewController {
         xmarkImageView.translatesAutoresizingMaskIntoConstraints = false
         xmarkImageView.isUserInteractionEnabled = true
         
+        view.addSubview(customView)
         customView.addSubview(xmarkImageView)
         
         NSLayoutConstraint.activate([
+            customView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+            customView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             customView.widthAnchor.constraint(equalToConstant: 40),
             customView.heightAnchor.constraint(equalToConstant: 40),
             
@@ -58,15 +60,33 @@ extension AddPlanViewController {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(popVC))
         customView.addGestureRecognizer(tapGesture)
         customView.isUserInteractionEnabled = true
-        
-        let xmarkBarButtonItem = UIBarButtonItem(customView: customView)
-        
-        self.navigationItem.leftBarButtonItem = xmarkBarButtonItem
     }
 
+    
+    // MARK: - Actions
+    /// 뒤로가기 액션
     @objc private func popVC() {
-        navigationController?.popViewController(animated: true)
+        dismiss(animated: true)
     }
 }
 
+
+extension AddPlanViewController {
+    
+    private func titleLabel() {
+        let titleLabel: UILabel = UILabel()
+        titleLabel.text = "무슨 책인가요?"
+        titleLabel.textColor = .black
+        titleLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 22)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(titleLabel)
+        
+        NSLayoutConstraint.activate([
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            titleLabel.heightAnchor.constraint(equalToConstant: 30),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 30)
+        ])
+    }
+}
 

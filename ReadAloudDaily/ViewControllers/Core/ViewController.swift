@@ -34,7 +34,13 @@ class ViewController: UIViewController {
         let addItemVC = AddPlanViewController()
         
         if let sheet = addItemVC.sheetPresentationController {
-            sheet.detents = [.medium()]
+            
+            //sheet.detents = [.medium()]
+            sheet.detents = [
+                .custom { _ in
+                    450.0
+                }
+            ]
             sheet.prefersGrabberVisible = true
             sheet.preferredCornerRadius = 25
         }

@@ -48,6 +48,7 @@ extension ViewController {
     
     private func setupUI() {
         
+        
         let config = UIImage.SymbolConfiguration(pointSize: 15, weight: .bold)
         let plusImage = UIImage(systemName: "plus", withConfiguration: config)
         

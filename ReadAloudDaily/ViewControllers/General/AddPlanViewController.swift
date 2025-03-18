@@ -75,7 +75,7 @@ extension AddPlanViewController {
     
     private func titleLabel() {
         let titleLabel: UILabel = UILabel()
-        titleLabel.text = "무슨 책인가요?"
+        titleLabel.text = "독서 계획을 세워주세요:)"
         titleLabel.textColor = .black
         titleLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 22)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false

@@ -49,5 +49,32 @@ class ReadItemViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
+    
+    
+    // 저장된 독서계획을 불러오는 메서드
+    func fetchReadItems() {
+        print("📤 ReadItemViewModel: 독서 계획 불러오기 요청")
+        
+        coredataManager.fetchReadItems()
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    print("✅ ReadItemViewModel: 독서 계획을 불러오기 완료")
+                case .failure(let error):
+                    print("❌ ReadItemViewModel: 불러오기 실패 - \(error.localizedDescription)")
+                    self.errorMessage = error.localizedDescription
+                }
+            } receiveValue: { [weak self] readItems in
+                print("📌 ReadItemViewModel: 받은 독서 계획 개수: \(readItems.count) 개")
+                
+                for (index, item) in readItems.enumerated() {
+                    print("   \(index + 1). \(item.title) - \(item.startDate) ~ \(item.endDate)")
+                }
+                
+                self?.readItems = readItems
+            }
+            .store(in: &cancellables)
+    }
 }
 

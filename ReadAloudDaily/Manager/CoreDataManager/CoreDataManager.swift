@@ -58,4 +58,50 @@ final class CoreDataManager {
         .eraseToAnyPublisher()
     }
     
+    
+    // Read
+    func fetchReadItems() -> AnyPublisher<[ReadItemModel], Error> {
+        return Future { [weak self] promise in
+            guard let self = self else {
+                print("❌ CoreDataManager: self가 nil이므로 종료")
+                return
+            }
+            
+            let request: NSFetchRequest<ReadItem> = ReadItem.fetchRequest()
+            request.sortDescriptors = [NSSortDescriptor(key: "startDate", ascending: false)]
+            
+            do {
+                let results = try self.context.fetch(request)
+                print("📥 CoreDataManager: Fetch 성공, 총 \(results.count)개의 데이터")
+                
+                let readItems = results.compactMap { readItem -> ReadItemModel? in
+                    guard let id = readItem.id,
+                          let title = readItem.title,
+                          let startDate = readItem.startDate,
+                          let endDate = readItem.endDate else {
+                        print("❌ Core Data에서 nil 값이 포함된 항목 발견, 해당 항목 제외")
+                        return nil
+                    }
+                    
+                    print("📌 CoreDataManager: 데이터 변환 성공 - \(title)")
+                    return ReadItemModel(
+                        id: id,
+                        title: title,
+                        startDate: startDate,
+                        endDate: endDate,
+                        dailyReadingTime: readItem.dailyReadingTime,
+                        isCompleted: readItem.isCompleted
+                    )
+                }
+                
+                promise(.success(readItems))
+                print("✅ CoreDataManager: 최종 반환할 독서 계획 개수: \(readItems.count) 개")
+            } catch {
+                promise(.failure(error))
+                print("❌ CoreDataManager: 독서 계획 불러오기 실패 - \(error.localizedDescription)")
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
 }

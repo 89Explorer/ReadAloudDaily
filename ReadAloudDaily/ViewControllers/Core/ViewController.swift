@@ -16,7 +16,7 @@ class ViewController: UIViewController {
     private let addItemButton: UIButton = UIButton(type: .system)
     private let viewModel: ReadItemViewModel = ReadItemViewModel()
     private var cancellables: Set<AnyCancellable> = []
-
+    
     // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,19 +24,30 @@ class ViewController: UIViewController {
         view.backgroundColor = .systemOrange
         didTappedAddItemButton()
         setupUI()
-        savedReadItem()
+        viewModel.fetchReadItems()
+        testViewBinding()
         
-        viewModel.$newCreatedItem
-            .sink { testItem in
-                guard let testItem = testItem  else { return }
-                print("ViewController: 테스트 목적 독서 계획 업데이트 됨")
-                print("    - Title: \(testItem.title)")
-            }
-            .store(in: &cancellables)
-
+        
     }
     
     // TEST
+    func testViewBinding() {
+//        viewModel.$newCreatedItem
+//            .sink { testItem in
+//                guard let testItem = testItem  else { return }
+//                print("ViewController: 테스트 목적 독서 계획 업데이트 됨")
+//                print("    - Title: \(testItem.title)")
+//            }
+//            .store(in: &cancellables)
+        
+        viewModel.$readItems
+            .sink { readItems in
+                print("🎯 ViewController: ReadItemViewModel에서 업데이트된 독서 계획 개수: \(readItems.count) 개")
+            }
+            .store(in: &cancellables)
+    }
+    
+    
     func savedReadItem() {
         let testReadItem = ReadItemModel(
             title: "CoreDataManager & ViewModel 확인 목적",
@@ -115,5 +126,5 @@ extension ViewController {
             }
         }
     }
-
+    
 }

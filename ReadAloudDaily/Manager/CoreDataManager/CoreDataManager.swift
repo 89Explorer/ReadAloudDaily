@@ -150,4 +150,44 @@ final class CoreDataManager {
         .eraseToAnyPublisher()
     }
     
+    
+    // Delete
+    func deleteReadItem(with id: String) -> AnyPublisher<Void, Error> {
+        return Future{ [weak self] promise in
+            guard let self = self else {
+                print("❌ CoreDataManager: self가 nil이므로 종료")
+                return
+            }
+            
+            print("📤 CoreDataManager: 삭제 요청 - ID: \(id)")
+            
+            let request: NSFetchRequest<ReadItem> = ReadItem.fetchRequest()
+            request.predicate = NSPredicate(format: "id == %@", id)
+            
+            do {
+                let results = try self.context.fetch(request)
+                
+                print("📥 CoreDataManager: Fetch 성공, 삭제할 데이터 개수: \(results.count) 개")
+                
+                guard let readItemToDelete = results.first else {
+                    print("❌ CoreDataManager: 해당 ID의 데이터가 존재하지 않음")
+                    throw NSError(domain: "CoreDataError", code: 404, userInfo: [NSLocalizedDescriptionKey: "ReadItem not found."])
+                }
+                
+                print("🗑 CoreDataManager: 삭제할 데이터 → 제목: \(readItemToDelete.title ?? "삭제 실패")")
+                
+                self.context.delete(readItemToDelete)
+                try self.context.save()
+                
+                print("✅ CoreDataManager: 삭제 완료 - \(readItemToDelete.title ?? "삭제 성공")")
+                
+                promise(.success(()))
+            } catch {
+                print("❌ CoreDataManager: 삭제 실패 - \(error.localizedDescription)")
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
 }

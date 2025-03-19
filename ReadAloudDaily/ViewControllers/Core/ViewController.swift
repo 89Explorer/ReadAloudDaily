@@ -26,12 +26,12 @@ class ViewController: UIViewController {
         setupUI()
         
         viewModel.fetchReadItems()
-        
-        testViewBinding()
+
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            self.updateTestReadItem()
+            self.deleteTestReadItem()
         }
+        
     }
     
     
@@ -152,18 +152,29 @@ extension ViewController {
     }
     
     // 독서 계획 수정
-    func updateTestReadItem() {
-        guard let existingItem = viewModel.readItems.first(where: { $0.title == "CoreDataManager & ViewModel 확인 목적" }) else {
-            print("❌ ViewController: 수정할 테스트 데이터가 없음!")
+//    func updateTestReadItem() {
+//        guard let existingItem = viewModel.readItems.first(where: { $0.title == "CoreDataManager & ViewModel 확인 목적" }) else {
+//            print("❌ ViewController: 수정할 테스트 데이터가 없음!")
+//            return
+//        }
+//        
+//        var updatedItem = existingItem
+//        updatedItem.title = "✅ 수정된 CoreData 테스트 데이터"
+//        updatedItem.isCompleted = true
+//        
+//        print("🔨ViewController: updateReadItem() 호출")
+//        viewModel.updateReadItem(existingItem)
+//    }
+    
+    func deleteTestReadItem() {
+        guard let itemToDelete = viewModel.readItems.first(where: { $0.title == "✅ 수정된 CoreData 테스트 데이터" }) else {
+            print("❌ ViewController: 삭제할 테스트 데이터가 없음!")
             return
         }
-        
-        var updatedItem = existingItem
-        updatedItem.title = "✅ 수정된 CoreData 테스트 데이터"
-        updatedItem.isCompleted = true
-        
-        print("🔨ViewController: updateReadItem() 호출")
-        viewModel.updateReadItem(existingItem)
+
+        print("🗑 ViewController: deleteReadItem() 호출 - ID: \(itemToDelete.id.uuidString)")
+        viewModel.deleteReadItem(with: itemToDelete.id.uuidString)
     }
+
     
 }

@@ -101,5 +101,27 @@ class ReadItemViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
+    
+    
+    // 저장된 독서계획을 삭제하는 메서드
+    func deleteReadItem(with id: String) {
+        
+        print("📤 ReadItemViewModel: 독서 계획 삭제 요청 - ID: \(id)")
+        
+        coredataManager.deleteReadItem(with: id)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    print("✅ ReadItemViewModel: 삭제 완료 - ID: \(id)")
+                case .failure(let error):
+                    print("❌ ReadItemViewModel: 삭제 실패 - \(error.localizedDescription)")
+                    self.errorMessage = error.localizedDescription
+                }
+            } receiveValue: { [weak self] in
+                print("📌 ReadItemViewModel: readItems 배열에서 삭제 - ID: \(id)")
+                self?.readItems.removeAll { $0.id.uuidString == id }
+            }
+            .store(in: &cancellables)
+    }
 }
 

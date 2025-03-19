@@ -78,17 +78,26 @@ class AddPlanViewController: UIViewController {
             }
             .store(in: &cancellables)
         
-        
-//        viewModel.$newCreatedItem
-//            .sink { [weak self] readItem in
-//                if readItem.endDate > readItem.startDate {
-//                    print("AddPlanViewController - 오류 발생")
-//                }
-//            }
-//            .store(in: &cancellables)
+        viewModel.$isDateValid
+            .sink { [weak self] isValid in
+                guard let self = self else { return }
+                if !isValid {
+                    // ✅ 현재 `presentedViewController`가 있으면 먼저 닫기
+                    if let presentedVC = self.presentedViewController {
+                        presentedVC.dismiss(animated: true) {
+                            DispatchQueue.main.async {
+                                self.showAlert(title: "날짜 오류", message: "선택하신 시작일과 종료일을 다시 확인해주세요 😅")
+                            }
+                        }
+                    } else {
+                        self.showAlert(title: "날짜 오류", message: "선택하신 시작일과 종료일을 다시 확인해주세요 😅")
+                    }
+                }
+            }
+            .store(in: &cancellables)
     }
     
-
+    
     /// 기존 데이터를 수정할 때, 기존 데이터를 받아오고, 테이블을 새로고침하는 메서드
     private func populateUI() {
         DispatchQueue.main.async {
@@ -383,10 +392,12 @@ extension AddPlanViewController: DateCellDelegate {
             //readItem.startDate = date
             viewModel.newCreatedItem.startDate = date
             viewModel.validReadItemForm()
+            viewModel.validDateForm()
         case .endDate:
             //readItem.endDate = date
             viewModel.newCreatedItem.endDate = date
             viewModel.validReadItemForm()
+            viewModel.validDateForm()
         }
         // selectedDates[type] = date
         // printSelectedDates()
@@ -417,5 +428,47 @@ extension AddPlanViewController {
         alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
         
         present(alert, animated: true, completion: nil)
+    }
+}
+
+
+// MARK: - Extension: Toast 메세지 기능 구현
+extension UIViewController {
+    func showToast(message: String, duration: TimeInterval = 2.0) {
+        let toastLabel = UILabel()
+        toastLabel.text = message
+        toastLabel.textColor = .white
+        toastLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        toastLabel.textAlignment = .center
+        toastLabel.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+        toastLabel.alpha = 0.0
+        toastLabel.layer.cornerRadius = 10
+        toastLabel.clipsToBounds = true
+        
+        let textSize = toastLabel.intrinsicContentSize
+        let padding: CGFloat = 20
+        let width = textSize.width + padding
+        let height = textSize.height + padding
+        
+        // ✅ 토스트 메시지 위치 설정 (화면 하단)
+        toastLabel.frame = CGRect(
+            x: (view.frame.width - width) / 2,
+            y: view.frame.height - 120,
+            width: width,
+            height: height
+        )
+        
+        view.addSubview(toastLabel)
+        
+        // ✅ 애니메이션 (나타났다 사라지기)
+        UIView.animate(withDuration: 0.5, animations: {
+            toastLabel.alpha = 1.0
+        }) { _ in
+            UIView.animate(withDuration: 0.5, delay: duration, options: .curveEaseOut, animations: {
+                toastLabel.alpha = 0.0
+            }) { _ in
+                toastLabel.removeFromSuperview()
+            }
+        }
     }
 }

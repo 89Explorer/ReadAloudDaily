@@ -41,7 +41,7 @@ class ReadItemViewModel: ObservableObject {
         $newCreatedItem
             .sink { [weak self] _ in
                 self?.validReadItemForm()
-                self?.validDateForm()
+                //self?.validDateForm()
             }
             .store(in: &cancellables)
     }
@@ -50,7 +50,8 @@ class ReadItemViewModel: ObservableObject {
     // MARK: - Function: 유효성 검사
     func validReadItemForm() {
         guard newCreatedItem.title.count >= 1,
-              newCreatedItem.dailyReadingTime >= 60 else {
+              newCreatedItem.endDate > newCreatedItem.startDate,
+              newCreatedItem.dailyReadingTime >= 59 else {
                   isFormValid = false
                   print("❌ 유효성 검사 실패: 제목 1자 이상, 독서 시간 1분 이상 필요")
                   return
@@ -62,7 +63,7 @@ class ReadItemViewModel: ObservableObject {
     
     
     func validDateForm() {
-        guard newCreatedItem.endDate < newCreatedItem.startDate else {
+        guard newCreatedItem.endDate > newCreatedItem.startDate else {
             isDateValid = false
             print("❌ 날짜 유효성 실패 ")
             return

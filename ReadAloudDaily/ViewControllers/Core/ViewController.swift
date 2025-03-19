@@ -11,11 +11,16 @@ import Combine
 
 class ViewController: UIViewController {
     
+    // MARK: - Variables
+    private let viewModel: ReadItemViewModel = ReadItemViewModel()
+    private var cancellables: Set<AnyCancellable> = []
+    
+    
     
     // MARK: - UI Components
     private let addItemButton: UIButton = UIButton(type: .system)
-    private let viewModel: ReadItemViewModel = ReadItemViewModel()
-    private var cancellables: Set<AnyCancellable> = []
+    
+    
     
     // MARK: - Life Cycle
     override func viewDidLoad() {

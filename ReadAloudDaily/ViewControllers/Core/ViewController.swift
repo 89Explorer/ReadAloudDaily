@@ -6,13 +6,16 @@
 //
 
 import UIKit
+import Combine
+
 
 class ViewController: UIViewController {
     
     
     // MARK: - UI Components
     private let addItemButton: UIButton = UIButton(type: .system)
-    
+    private let viewModel: ReadItemViewModel = ReadItemViewModel()
+    private var cancellables: Set<AnyCancellable> = []
 
     // MARK: - Life Cycle
     override func viewDidLoad() {
@@ -21,6 +24,29 @@ class ViewController: UIViewController {
         view.backgroundColor = .systemOrange
         didTappedAddItemButton()
         setupUI()
+        savedReadItem()
+        
+        viewModel.$newCreatedItem
+            .sink { testItem in
+                guard let testItem = testItem  else { return }
+                print("ViewController: 테스트 목적 독서 계획 업데이트 됨")
+                print("    - Title: \(testItem.title)")
+            }
+            .store(in: &cancellables)
+
+    }
+    
+    // TEST
+    func savedReadItem() {
+        let testReadItem = ReadItemModel(
+            title: "CoreDataManager & ViewModel 확인 목적",
+            startDate: Date(),
+            endDate: Calendar.current.date(byAdding: .day, value: 7, to: Date())!,
+            dailyReadingTime: 60 * 3,
+            isCompleted: false)
+        
+        print("📍 ViewController: createNewReadItem() 호출")
+        viewModel.createNewReadItem(testReadItem)
     }
     
     

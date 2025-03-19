@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9DFB3AFF2D895FD400EC8BC7 /* ReadItem+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DFB3AFE2D895FD400EC8BC7 /* ReadItem+CoreDataProperties.swift */; };
+		9DFB3B002D895FD400EC8BC7 /* ReadItem+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DFB3AFD2D895FD400EC8BC7 /* ReadItem+CoreDataClass.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		9DFB3A012D8811F100EC8BC7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +32,8 @@
 		9DFB39E72D8811EF00EC8BC7 /* ReadAloudDaily.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReadAloudDaily.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9DFB3A002D8811F100EC8BC7 /* ReadAloudDailyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReadAloudDailyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9DFB3A0A2D8811F100EC8BC7 /* ReadAloudDailyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReadAloudDailyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9DFB3AFD2D895FD400EC8BC7 /* ReadItem+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReadItem+CoreDataClass.swift"; sourceTree = "<group>"; };
+		9DFB3AFE2D895FD400EC8BC7 /* ReadItem+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ReadItem+CoreDataProperties.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -88,6 +95,8 @@
 		9DFB39DE2D8811EF00EC8BC7 = {
 			isa = PBXGroup;
 			children = (
+				9DFB3AFD2D895FD400EC8BC7 /* ReadItem+CoreDataClass.swift */,
+				9DFB3AFE2D895FD400EC8BC7 /* ReadItem+CoreDataProperties.swift */,
 				9DFB39E92D8811EF00EC8BC7 /* ReadAloudDaily */,
 				9DFB3A032D8811F100EC8BC7 /* ReadAloudDailyTests */,
 				9DFB3A0D2D8811F100EC8BC7 /* ReadAloudDailyUITests */,
@@ -249,6 +258,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9DFB3AFF2D895FD400EC8BC7 /* ReadItem+CoreDataProperties.swift in Sources */,
+				9DFB3B002D895FD400EC8BC7 /* ReadItem+CoreDataClass.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

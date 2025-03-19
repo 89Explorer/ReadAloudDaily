@@ -12,6 +12,7 @@ class TimeCell: UITableViewCell {
     // MARK: - Variables
     static let reuseIdentifier: String = "TimeCell"
     private var remainingSeconds: Int = 0
+    weak var delegate: TimeCellDelegate?
     
     
     // MARK: - UI Component
@@ -87,13 +88,24 @@ class TimeCell: UITableViewCell {
     // MARK: Actions
     @objc private func selectedTime(_ sender: UIDatePicker) {
         let selectedTime = Int(datePicker.countDownDuration)
+        delegate?.didUpdateReadingTime(selectedTime)
+        
+        // 확인용
         let timer = secondsToHoursMinutesSeconds(selectedTime)
         print("선택된 시간: \(makeTimeString(hour: timer.0, min: timer.1, sec: timer.2))")
     }
 }
 
 
-// MARK: - Extension: 날짜 선택 관련 설정 메서드
+// MARK: - Protocol: TimeCellDelegate (데이터 전달 목적)
+protocol TimeCellDelegate: AnyObject {
+    func didUpdateReadingTime(_ time: Int)
+}
+
+
+
+
+// MARK: - Extension: 날짜 선택 관련 설정 메서드 - UILabel 사용할 경우
 extension TimeCell {
     
     func secondsToHoursMinutesSeconds(_ seconds: Int) -> (Int, Int, Int) {
@@ -157,3 +169,6 @@ extension TimeCell {
         }
     }
 }
+
+
+

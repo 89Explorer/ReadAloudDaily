@@ -6,11 +6,17 @@
 //
 
 import UIKit
+import Combine
+
 
 class AddPlanViewController: UIViewController {
     
     // MARK: - Variables
-    //private var sectionHeader: [String] = ["📖 책을 정해요", "📆 독서 기간을 정해요", "⏰ 1일 독서시간을 정해요"]
+    private var viewModel: ReadItemViewModel = ReadItemViewModel()
+    private var cancellables: Set<AnyCancellable> = []
+    
+    private var readItem: ReadItemModel
+    private var isFormValid: Bool = false
     
     /// 선택된 날짜 저장
     private var selectedDates: [DateType: Date] = [
@@ -18,10 +24,28 @@ class AddPlanViewController: UIViewController {
         .endDate: Date()
     ]
     
-    
     // MARK: - UI Components
     private let addItemTableView: UITableView = UITableView(frame: .zero, style: .insetGrouped)
     private let saveButton: UIButton = UIButton(type: .system)
+    
+    
+    // MARK: - init
+    init(readItem: ReadItemModel? = nil) {
+        self.readItem = readItem ?? ReadItemModel(
+            title: "",
+            startDate: Date(),
+            endDate: Date(),
+            dailyReadingTime: 0,
+            isCompleted: false
+        )
+        super.init(nibName: nil, bundle: nil)
+        self.viewModel.newCreatedItem = self.readItem
+    }
+    
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     
     // MARK: - Life Cycle
@@ -35,7 +59,32 @@ class AddPlanViewController: UIViewController {
         setupBackButton()
         titleLabel()
         setupUI()
+        
+        viewModel.validReadItemForm()
+        populateUI()
+        setupBinding()
     }
+    
+    // MARK: - Function
+    // 바인딩 함수
+    private func setupBinding() {
+        viewModel.$isFormValid
+            .sink { [weak self] isValid in
+                self?.saveButton.isEnabled = isValid
+                self?.saveButton.backgroundColor = isValid ? UIColor.systemGreen : UIColor.systemGray
+                print("🔄 saveButton 상태 변경: \(isValid ? "활성화됨" : "비활성화됨")")
+            }
+            .store(in: &cancellables)
+    }
+    
+    
+    /// 기존 데이터를 수정할 때, 기존 데이터를 받아오고, 테이블을 새로고침하는 메서드
+    private func populateUI() {
+        DispatchQueue.main.async {
+            self.addItemTableView.reloadData()
+        }
+    }
+    
     
     // MARK: - Actions
     @objc private func dismissKeyboard() {
@@ -43,6 +92,7 @@ class AddPlanViewController: UIViewController {
     }
     
 }
+
 
 
 // MARK: - 뒤로가기 버튼 설정
@@ -94,6 +144,7 @@ extension AddPlanViewController {
 }
 
 
+
 // MARK: - Extension: 화면에 제목 생성하기
 extension AddPlanViewController {
     
@@ -115,6 +166,7 @@ extension AddPlanViewController {
 }
 
 
+
 // MARK: - Extension: 테이블 및 버튼 설정
 extension AddPlanViewController {
     
@@ -127,6 +179,8 @@ extension AddPlanViewController {
         saveButton.layer.cornerRadius = 15
         saveButton.layer.masksToBounds = true
         saveButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        saveButton.addTarget(self, action: #selector(didTappedSaveButton), for: .touchUpInside)
         
         addItemTableView.showsVerticalScrollIndicator = false
         addItemTableView.isScrollEnabled = false
@@ -156,7 +210,24 @@ extension AddPlanViewController {
         ])
     }
     
+    // MARK: - Actions
+    /// 저장 버튼을 눌렀을 때 동작하는 저장 메서드
+    @objc private func didTappedSaveButton() {
+        print("✅ didTappedSaveButton - called")
+        
+        if viewModel.readItems.contains(where: { $0.id == readItem.id }) {
+            viewModel.updateReadItem(viewModel.newCreatedItem)
+            print("🔨수정된 데이터 저장: \(readItem)")
+        } else {
+            viewModel.createNewReadItem(viewModel.newCreatedItem)
+            print("🎉 새로운 데이터 저장: \(readItem)")
+        }
+        
+        dismiss(animated: true)
+    }
+    
 }
+
 
 
 // MARK: - Extension: 테이블 델리게이트 설정
@@ -185,6 +256,8 @@ extension AddPlanViewController: UITableViewDelegate, UITableViewDataSource {
         case .book:
             guard let cell = tableView.dequeueReusableCell(withIdentifier: BookCell.reuseIdentifier, for: indexPath) as? BookCell else { return UITableViewCell() }
             
+            cell.delegate = self
+            
             return cell
             
         case .date:
@@ -200,9 +273,10 @@ extension AddPlanViewController: UITableViewDelegate, UITableViewDataSource {
             guard let cell = tableView.dequeueReusableCell(withIdentifier: TimeCell.reuseIdentifier, for: indexPath) as? TimeCell else { return UITableViewCell() }
             
             cell.configure(with: "1회 독서 시간")
-            cell.selectionStyle = .none
+            cell.delegate = self
+            
             return cell
-
+            
         }
     }
     
@@ -237,30 +311,6 @@ extension AddPlanViewController: UITableViewDelegate, UITableViewDataSource {
 }
 
 
-// MARK: - Extension: DateCellDelegate 메서드 설정
-extension AddPlanViewController: DateCellDelegate {
-    func didSelectedDate(with type: DateType, date: Date) {
-        selectedDates[type] = date
-        // printSelectedDates()
-    }
-    
-    /// 달력 선택 확인용 메서드
-    private func printSelectedDates() {
-        print("선택된 날짜 목록:")
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 MM월 dd일"
-        
-        // ✅ DateType.allCases를 사용해 순서대로 출력
-        for type in DateType.allCases {
-            if let date = selectedDates[type] {
-                let dateString = formatter.string(from: date)
-                print("- \(type.title): \(dateString)")
-            }
-        }
-    }
-}
-
-
 
 // MARK: - Enum: AddItemTable의 셀 관리 목적 섹션
 enum AddItemTableSection: CaseIterable {
@@ -280,5 +330,64 @@ enum AddItemTableSection: CaseIterable {
     }
 }
 
+
+
+// MARK: - Extension: BookCellDelegate
+extension AddPlanViewController: BookCellDelegate {
+    func didUpdateTitle(_ title: String) {
+        //readItem.title = title
+        //self.validReadItemForm()
+        viewModel.newCreatedItem.title = title
+        viewModel.validReadItemForm()
+    }
+}
+
+
+
+// MARK: - Extension: TimeCellDelegate
+extension AddPlanViewController: TimeCellDelegate {
+    func didUpdateReadingTime(_ time: Int) {
+        //readItem.dailyReadingTime = TimeInterval(time)
+        //self.validReadItemForm()
+        viewModel.newCreatedItem.dailyReadingTime = TimeInterval(time)
+        viewModel.validReadItemForm()
+    }
+}
+
+
+
+// MARK: - Extension: DateCellDelegate
+extension AddPlanViewController: DateCellDelegate {
+    func didSelectedDate(with type: DateType, date: Date) {
+        
+        switch type {
+        case .startDate:
+            //readItem.startDate = date
+            viewModel.newCreatedItem.startDate = date
+            viewModel.validReadItemForm()
+        case .endDate:
+            //readItem.endDate = date
+            viewModel.newCreatedItem.endDate = date
+            viewModel.validReadItemForm()
+        }
+        // selectedDates[type] = date
+        // printSelectedDates()
+    }
+    
+    /// 달력 선택 확인용 메서드
+    private func printSelectedDates() {
+        print("선택된 날짜 목록:")
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy년 MM월 dd일"
+        
+        // ✅ DateType.allCases를 사용해 순서대로 출력
+        for type in DateType.allCases {
+            if let date = selectedDates[type] {
+                let dateString = formatter.string(from: date)
+                print("- \(type.title): \(dateString)")
+            }
+        }
+    }
+}
 
 

@@ -24,14 +24,7 @@ class ViewController: UIViewController {
         view.backgroundColor = .systemOrange
         didTappedAddItemButton()
         setupUI()
-        
-        viewModel.fetchReadItems()
-
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            self.deleteTestReadItem()
-        }
-        
+        testViewBinding()
     }
     
     
@@ -42,7 +35,7 @@ class ViewController: UIViewController {
     
     // MARK: - Actions
     @objc private func addItem() {
-        let addItemVC = AddPlanViewController()
+        let addItemVC = AddPlanViewController(readItem: nil)
         
         if let sheet = addItemVC.sheetPresentationController {
             
@@ -104,6 +97,8 @@ extension ViewController {
 }
 
 
+
+
 // MARK: - 독서계획의 CRUD 동작 확인을 목적으로 한 메서드 모음 (Combine + MVVM)
 extension ViewController {
     
@@ -111,13 +106,12 @@ extension ViewController {
     func testViewBinding() {
         
         // Create
-        //        viewModel.$newCreatedItem
-        //            .sink { testItem in
-        //                guard let testItem = testItem  else { return }
-        //                print("ViewController: 테스트 목적 독서 계획 업데이트 됨")
-        //                print("    - Title: \(testItem.title)")
-        //            }
-        //            .store(in: &cancellables)
+        viewModel.$newCreatedItem
+            .sink { testItem in
+                print("ViewController: 테스트 목적 독서 계획 업데이트 됨")
+                print("    - Title: \(testItem.title)")
+            }
+            .store(in: &cancellables)
         
         // Read 메서드 확인 목적
         //        viewModel.$readItems
@@ -127,14 +121,14 @@ extension ViewController {
         //            .store(in: &cancellables)
         
         // Update 메서드 확인 목적
-        viewModel.$readItems
-            .sink { readItems in
-                print("🎯 ViewController: 업데이트된 독서 계획 개수: \(readItems.count) 개")
-                for item in readItems {
-                    print("   - \(item.title) | 완료 여부: \(item.isCompleted)")
-                }
-            }
-            .store(in: &cancellables)
+        //        viewModel.$readItems
+        //            .sink { readItems in
+        //                print("🎯 ViewController: 업데이트된 독서 계획 개수: \(readItems.count) 개")
+        //                for item in readItems {
+        //                    print("   - \(item.title) | 완료 여부: \(item.isCompleted)")
+        //                }
+        //            }
+        //            .store(in: &cancellables)
     }
     
     
@@ -152,29 +146,29 @@ extension ViewController {
     }
     
     // 독서 계획 수정
-//    func updateTestReadItem() {
-//        guard let existingItem = viewModel.readItems.first(where: { $0.title == "CoreDataManager & ViewModel 확인 목적" }) else {
-//            print("❌ ViewController: 수정할 테스트 데이터가 없음!")
-//            return
-//        }
-//        
-//        var updatedItem = existingItem
-//        updatedItem.title = "✅ 수정된 CoreData 테스트 데이터"
-//        updatedItem.isCompleted = true
-//        
-//        print("🔨ViewController: updateReadItem() 호출")
-//        viewModel.updateReadItem(existingItem)
-//    }
+    //    func updateTestReadItem() {
+    //        guard let existingItem = viewModel.readItems.first(where: { $0.title == "CoreDataManager & ViewModel 확인 목적" }) else {
+    //            print("❌ ViewController: 수정할 테스트 데이터가 없음!")
+    //            return
+    //        }
+    //
+    //        var updatedItem = existingItem
+    //        updatedItem.title = "✅ 수정된 CoreData 테스트 데이터"
+    //        updatedItem.isCompleted = true
+    //
+    //        print("🔨ViewController: updateReadItem() 호출")
+    //        viewModel.updateReadItem(existingItem)
+    //    }
     
     func deleteTestReadItem() {
         guard let itemToDelete = viewModel.readItems.first(where: { $0.title == "✅ 수정된 CoreData 테스트 데이터" }) else {
             print("❌ ViewController: 삭제할 테스트 데이터가 없음!")
             return
         }
-
+        
         print("🗑 ViewController: deleteReadItem() 호출 - ID: \(itemToDelete.id.uuidString)")
         viewModel.deleteReadItem(with: itemToDelete.id.uuidString)
     }
-
+    
     
 }

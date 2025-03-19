@@ -13,11 +13,50 @@ import UIKit
 class ReadItemViewModel: ObservableObject {
     
     // MARK: - Variables
-    @Published var newCreatedItem: ReadItemModel?
+    @Published var newCreatedItem: ReadItemModel = ReadItemModel(
+        title: "",
+        startDate: Date(),
+        endDate: Date(),
+        dailyReadingTime: 0,
+        isCompleted: false
+    )
+    
     @Published var readItems: [ReadItemModel] = []
     @Published var errorMessage: String?
+    
+    @Published var isFormValid: Bool = false
+    
     private var cancellables: Set<AnyCancellable> = []
     private let coredataManager = CoreDataManager.shared
+    
+    
+    // MARK: - Init
+    init() {
+        setupBindings()
+    }
+    
+    /// 유효성 검사 진행 - (newCreatedItem이 변경될 때 실행)
+    private func setupBindings() {
+        $newCreatedItem
+            .sink { [weak self] _ in
+                self?.validReadItemForm()
+            }
+            .store(in: &cancellables)
+    }
+    
+    
+    // MARK: - Function: 유효성 검사
+    func validReadItemForm() {
+        guard newCreatedItem.title.count >= 2,
+              newCreatedItem.dailyReadingTime >= 300 else {
+            isFormValid = false
+            print("❌ 유효성 검사 실패: 제목 2자 이상, 독서 시간 1분 이상 필요")
+            return
+        }
+        isFormValid = true
+        print("✅ 유효성 검사 통과")
+    }
+    
     
     
     // MARK: - Functions: CRUD

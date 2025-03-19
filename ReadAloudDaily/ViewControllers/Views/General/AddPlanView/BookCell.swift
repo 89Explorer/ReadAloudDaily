@@ -6,11 +6,14 @@
 //
 
 import UIKit
+import Combine
 
 class BookCell: UITableViewCell {
     
     // MARK: - Variable
     static let reuseIdentifier: String = "BookCell"
+    var readItemViewModel: ReadItemViewModel?
+    weak var delegate: BookCellDelegate?
     
     
     // MARK: - UI Component
@@ -38,6 +41,7 @@ class BookCell: UITableViewCell {
         titleTextField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 5))
         titleTextField.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
         titleTextField.textColor = .black
+        titleTextField.addTarget(self, action: #selector(textChanged), for: .editingChanged)
         titleTextField.translatesAutoresizingMaskIntoConstraints = false
         
         contentView.addSubview(titleTextField)
@@ -50,4 +54,16 @@ class BookCell: UITableViewCell {
         ])
     }
     
+    
+    // MARK: - Actions
+    @objc private func textChanged() {
+        let title = titleTextField.text ?? ""
+        delegate?.didUpdateTitle(title)
+    }
+}
+
+
+// MARK: - Protocol: BookCellDelegate (데이터 전달 목적)
+protocol BookCellDelegate: AnyObject {
+    func didUpdateTitle(_ title: String)
 }

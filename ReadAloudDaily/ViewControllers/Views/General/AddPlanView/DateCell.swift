@@ -99,3 +99,4 @@ enum DateType: CaseIterable {
 protocol DateCellDelegate: AnyObject {
     func didSelectedDate(with type: DateType, date: Date)
 }
+

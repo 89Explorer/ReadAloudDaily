@@ -25,6 +25,7 @@ class DateCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         contentView.backgroundColor = .clear
+    
         setupUI()
     }
     
@@ -40,6 +41,7 @@ class DateCell: UITableViewCell {
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .compact
         datePicker.locale = Locale(identifier: "ko_KR")
+        datePicker.timeZone = TimeZone(identifier: "Asia/Seoul")
         datePicker.date = Date()
         
         datePicker.addTarget(self, action: #selector(selectedDate), for: .valueChanged)
@@ -65,9 +67,10 @@ class DateCell: UITableViewCell {
     }
     
     /// 선택일, 종료일 선택 메서드
-    func configure(with type: DateType) {
+    func configure(with type: DateType, date: Date?) {
         self.dateType = type
         dateLabel.text = type.title
+        datePicker.countDownDuration = date?.timeIntervalSince1970 ?? 0
     }
     
     
@@ -75,7 +78,6 @@ class DateCell: UITableViewCell {
     @objc private func selectedDate() {
         delegate?.didSelectedDate(with: dateType, date: datePicker.date)
     }
-    
 }
 
 

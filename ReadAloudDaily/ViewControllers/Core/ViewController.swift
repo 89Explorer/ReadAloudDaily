@@ -24,6 +24,7 @@ class ViewController: UIViewController {
         view.backgroundColor = .systemOrange
         didTappedAddItemButton()
         setupUI()
+        
         testViewBinding()
     }
     

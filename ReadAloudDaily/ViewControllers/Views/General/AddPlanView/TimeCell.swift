@@ -73,8 +73,9 @@ class TimeCell: UITableViewCell {
     }
     
     /// 테이블 셀에 데이터 전달
-    func configure(with title: String) {
+    func configure(with title: String, time: Double?) {
         timeLabel.text = title
+        datePicker.countDownDuration = time ?? 1
     }
     
     

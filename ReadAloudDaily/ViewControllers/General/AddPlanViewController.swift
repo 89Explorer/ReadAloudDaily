@@ -65,9 +65,11 @@ class AddPlanViewController: UIViewController {
         setupBinding()
     }
     
+    
     // MARK: - Function
     // 바인딩 함수
     private func setupBinding() {
+        
         viewModel.$isFormValid
             .sink { [weak self] isValid in
                 self?.saveButton.isEnabled = isValid
@@ -75,9 +77,18 @@ class AddPlanViewController: UIViewController {
                 print("🔄 saveButton 상태 변경: \(isValid ? "활성화됨" : "비활성화됨")")
             }
             .store(in: &cancellables)
+        
+        
+//        viewModel.$newCreatedItem
+//            .sink { [weak self] readItem in
+//                if readItem.endDate > readItem.startDate {
+//                    print("AddPlanViewController - 오류 발생")
+//                }
+//            }
+//            .store(in: &cancellables)
     }
     
-    
+
     /// 기존 데이터를 수정할 때, 기존 데이터를 받아오고, 테이블을 새로고침하는 메서드
     private func populateUI() {
         DispatchQueue.main.async {
@@ -265,14 +276,21 @@ extension AddPlanViewController: UITableViewDelegate, UITableViewDataSource {
                 return UITableViewCell() }
             
             let dateType = DateType.allCases[indexPath.row]
-            cell.configure(with: dateType)
+            switch dateType {
+            case .startDate:
+                cell.configure(with: .startDate, date: readItem.startDate)
+            case .endDate:
+                cell.configure(with: .endDate, date: readItem.endDate)
+            }
+            
             cell.delegate = self
+            
             return cell
             
         case .time:
             guard let cell = tableView.dequeueReusableCell(withIdentifier: TimeCell.reuseIdentifier, for: indexPath) as? TimeCell else { return UITableViewCell() }
             
-            cell.configure(with: "1회 독서 시간")
+            cell.configure(with: "1회 독서 시간", time: readItem.dailyReadingTime)
             cell.delegate = self
             
             return cell
@@ -391,3 +409,13 @@ extension AddPlanViewController: DateCellDelegate {
 }
 
 
+// MARK: - Extension: 경고창 메서드 구현 
+extension AddPlanViewController {
+    /// 경고창
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+        
+        present(alert, animated: true, completion: nil)
+    }
+}

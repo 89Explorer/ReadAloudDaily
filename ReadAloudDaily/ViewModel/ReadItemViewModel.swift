@@ -25,6 +25,7 @@ class ReadItemViewModel: ObservableObject {
     @Published var errorMessage: String?
     
     @Published var isFormValid: Bool = false
+    @Published var isDateValid: Bool = false
     
     private var cancellables: Set<AnyCancellable> = []
     private let coredataManager = CoreDataManager.shared
@@ -40,6 +41,7 @@ class ReadItemViewModel: ObservableObject {
         $newCreatedItem
             .sink { [weak self] _ in
                 self?.validReadItemForm()
+                self?.validDateForm()
             }
             .store(in: &cancellables)
     }
@@ -47,17 +49,28 @@ class ReadItemViewModel: ObservableObject {
     
     // MARK: - Function: 유효성 검사
     func validReadItemForm() {
-        guard newCreatedItem.title.count >= 2,
-              newCreatedItem.dailyReadingTime >= 300 else {
-            isFormValid = false
-            print("❌ 유효성 검사 실패: 제목 2자 이상, 독서 시간 1분 이상 필요")
-            return
-        }
+        guard newCreatedItem.title.count >= 1,
+              newCreatedItem.dailyReadingTime >= 60 else {
+                  isFormValid = false
+                  print("❌ 유효성 검사 실패: 제목 1자 이상, 독서 시간 1분 이상 필요")
+                  return
+              }
+        
         isFormValid = true
         print("✅ 유효성 검사 통과")
     }
     
     
+    func validDateForm() {
+        guard newCreatedItem.endDate < newCreatedItem.startDate else {
+            isDateValid = false
+            print("❌ 날짜 유효성 실패 ")
+            return
+        }
+        isDateValid = true
+        print("✅ 날짜 유요성 통과")
+    }
+
     
     // MARK: - Functions: CRUD
     // 새 독서계획을 저장하는 메서드

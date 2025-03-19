@@ -24,6 +24,7 @@ class BookCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         contentView.backgroundColor = .clear
+        titleTextField.delegate = self
         setupUI()
     }
     
@@ -55,11 +56,39 @@ class BookCell: UITableViewCell {
     }
     
     
+    func configure(_ readItem: ReadItemModel) {
+        titleTextField.text = readItem.title
+    }
+    
+    
     // MARK: - Actions
     @objc private func textChanged() {
         let title = titleTextField.text ?? ""
         delegate?.didUpdateTitle(title)
     }
+}
+
+
+// MARK: - Extension: UITextFieldDelegate - 조건에 따라 테두리 스타일 변경 
+extension BookCell: UITextFieldDelegate {
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        textField.layer.borderWidth = 1.5
+        textField.layer.borderColor = UIColor.black.cgColor
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        
+        if textField.text?.count == 0 {
+            textField.layer.borderWidth = 1.5
+            textField.layer.borderColor = UIColor.systemRed.cgColor
+            textField.placeholder = "📚 책 제목은 꼭 입력해주세요"
+        } else {
+            textField.layer.borderWidth = 0
+            textField.layer.borderColor = UIColor.clear.cgColor
+        }
+    }
+    
 }
 
 

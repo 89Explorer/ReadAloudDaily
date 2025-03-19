@@ -76,5 +76,30 @@ class ReadItemViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
+    
+    
+    // 저장된 독서계획을 수정하는 메서드
+    func updateReadItem(_ item: ReadItemModel) {
+        print("📤 ReadItemViewModel: 독서 계획 업데이트 요청 - \(item.title)")
+        
+        coredataManager.updateReadItem(item)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    print("✅ ReadItemViewModel: 수정 완료 - \(item.title)")
+                case .failure(let error):
+                    print("❌ ReadItemViewModel: 수정 실패 - \(error.localizedDescription)")
+                    self.errorMessage = error.localizedDescription
+                }
+            } receiveValue: { [weak self] updatedItem in
+                if let index = self?.readItems.firstIndex(where: {  $0.id == updatedItem.id }) {
+                    print("📌 ReadItemViewModel: 배열 내 기존 값 업데이트 - \(updatedItem.title)")
+                    self?.readItems[index] = updatedItem
+                } else {
+                    print("⚠️ ReadItemViewModel: 업데이트할 데이터가 배열에서 찾을 수 없음")
+                }
+            }
+            .store(in: &cancellables)
+    }
 }
 

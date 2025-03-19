@@ -104,4 +104,50 @@ final class CoreDataManager {
         .eraseToAnyPublisher()
     }
     
+    
+    // Update
+    func updateReadItem(_ readItem: ReadItemModel) -> AnyPublisher<ReadItemModel, Error> {
+        return Future { [weak self] promise in
+            guard let self = self else {
+                print("❌ CoreDataManager: self가 nil이므로 종료")
+                return
+            }
+            
+            print("📤 CoreDataManager: 업데이트 요청 - ID: \(readItem.id), 제목: \(readItem.title)")
+            
+            let request: NSFetchRequest<ReadItem> = ReadItem.fetchRequest()
+            request.predicate = NSPredicate(format: "id == %@", readItem.id as CVarArg)
+            
+            do {
+                let results = try self.context.fetch(request)
+                print("📥 CoreDataManager: Fetch 성공, 총 \(results.count)개의 데이터")
+                
+                guard let readItemToUpdate = results.first else {
+                    print("❌ CoreDataManager: 해당 ID의 데이터가 존재하지 않음")
+                    throw NSError(domain: "CoreDataError", code: 404, userInfo: [NSLocalizedDescriptionKey: "ReadItem not found."])
+                }
+                
+                print("✏️ CoreDataManager: 기존 값 → 제목: \(readItemToUpdate.title ?? "실패"), 시작일: \(readItemToUpdate.startDate ?? Date()), 완료 여부: \(readItemToUpdate.isCompleted)")
+
+                
+                // ✅ 값 업데이트
+                readItemToUpdate.title = readItem.title
+                readItemToUpdate.startDate = readItem.startDate
+                readItemToUpdate.endDate = readItem.endDate
+                readItemToUpdate.dailyReadingTime = readItem.dailyReadingTime
+                readItemToUpdate.isCompleted = readItem.isCompleted
+
+                try self.context.save()
+                print("✅ CoreDataManager: 수정 완료! - 새 제목: \(readItemToUpdate.title ?? "실패"), 완료 여부: \(readItemToUpdate.isCompleted)")
+
+                promise(.success(readItem)) // ✅ 성공 시 업데이트된 데이터 반환
+
+            } catch {
+                print("❌ CoreDataManager: 수정 실패: \(error.localizedDescription)")
+                promise(.failure(error)) // ❌ 실패 시 에러 반환
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
 }

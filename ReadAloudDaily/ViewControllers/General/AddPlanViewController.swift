@@ -15,6 +15,7 @@ class AddPlanViewController: UIViewController {
     private var viewModel: ReadItemViewModel = ReadItemViewModel()
     private var cancellables: Set<AnyCancellable> = []
     
+    private let mode: AddPlanMode
     private var readItem: ReadItemModel
     private var isFormValid: Bool = false
     
@@ -30,17 +31,27 @@ class AddPlanViewController: UIViewController {
     
     
     // MARK: - init
-    init(readItem: ReadItemModel? = nil) {
-        self.readItem = readItem ?? ReadItemModel(
-            title: "",
-            startDate: Date(),
-            endDate: Date(),
-            dailyReadingTime: 0,
-            isCompleted: false
-        )
-        super.init(nibName: nil, bundle: nil)
+    
+    init(mode: AddPlanMode, readItem: ReadItemModel? = nil) {
+        self.mode = mode
+        switch mode {
+        case .create:
+            self.readItem = readItem ?? ReadItemModel(
+                title: "",
+                startDate: Date(),
+                endDate: Date(),
+                dailyReadingTime: 0,
+                isCompleted: false
+            )
+        case .edit:
+            self.readItem = readItem!
+        }
+        
         self.viewModel.newCreatedItem = self.readItem
+        super.init(nibName: nil, bundle: nil)
+       
     }
+    
     
     
     required init?(coder: NSCoder) {
@@ -57,12 +68,15 @@ class AddPlanViewController: UIViewController {
         view.addGestureRecognizer(tapGesture)
         
         setupBackButton()
-        titleLabel()
-        setupUI()
+        titleLabel(mode: mode)
+        //titleLabel()
+        //setupUI()
+        setupUI(mode: mode)
         
         viewModel.validReadItemForm()
         populateUI()
         setupBinding()
+        
     }
     
     
@@ -167,10 +181,16 @@ extension AddPlanViewController {
 
 // MARK: - Extension: 화면에 제목 생성하기
 extension AddPlanViewController {
-    
-    private func titleLabel() {
+ 
+    private func titleLabel(mode: AddPlanMode) {
         let titleLabel: UILabel = UILabel()
-        titleLabel.text = "독서 계획을 세워주세요:)"
+        switch mode {
+        case .create:
+            titleLabel.text = "독서 계획을 세워주세요 :)"
+        case .edit:
+            titleLabel.text = "독서 계획을 수정해주세요 :)"
+        }
+        //titleLabel.text = "독서 계획을 세워주세요:)"
         titleLabel.textColor = .black
         titleLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 26)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -190,9 +210,16 @@ extension AddPlanViewController {
 // MARK: - Extension: 테이블 및 버튼 설정
 extension AddPlanViewController {
     
-    private func setupUI() {
+    private func setupUI(mode: AddPlanMode) {
         
-        saveButton.setTitle("일정 생성", for: .normal)
+        switch mode {
+        case .create:
+            saveButton.setTitle("일정 생성", for: .normal)
+        case .edit:
+            saveButton.setTitle("일정 수정", for: .normal)
+        }
+        
+        //saveButton.setTitle("일정 생성", for: .normal)
         saveButton.titleLabel?.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 24)
         saveButton.tintColor = .black
         saveButton.backgroundColor = .systemGray
@@ -235,14 +262,14 @@ extension AddPlanViewController {
     @objc private func didTappedSaveButton() {
         print("✅ didTappedSaveButton - called")
         
-        if viewModel.readItems.contains(where: { $0.id == readItem.id }) {
-            viewModel.updateReadItem(viewModel.newCreatedItem)
-            print("🔨수정된 데이터 저장: \(readItem)")
-        } else {
+        switch mode {
+        case .create:
             viewModel.createNewReadItem(viewModel.newCreatedItem)
             print("🎉 새로운 데이터 저장: \(readItem)")
+        case .edit:
+            viewModel.updateReadItem(viewModel.newCreatedItem)
+            print("🔨수정된 데이터 저장: \(readItem)")
         }
-        
         dismiss(animated: true)
     }
     
@@ -277,7 +304,7 @@ extension AddPlanViewController: UITableViewDelegate, UITableViewDataSource {
             guard let cell = tableView.dequeueReusableCell(withIdentifier: BookCell.reuseIdentifier, for: indexPath) as? BookCell else { return UITableViewCell() }
             
             cell.delegate = self
-            
+            cell.configure(readItem)
             return cell
             
         case .date:
@@ -285,13 +312,16 @@ extension AddPlanViewController: UITableViewDelegate, UITableViewDataSource {
                 return UITableViewCell() }
             
             let dateType = DateType.allCases[indexPath.row]
+            let date: Date?
+            
             switch dateType {
             case .startDate:
-                cell.configure(with: .startDate, date: readItem.startDate)
+                date = readItem.startDate
             case .endDate:
-                cell.configure(with: .endDate, date: readItem.endDate)
+                date = readItem.endDate
             }
             
+            cell.configure(with: dateType, date: date)
             cell.delegate = self
             
             return cell
@@ -314,8 +344,7 @@ extension AddPlanViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else { return }
         header.textLabel?.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        header.textLabel?.frame = CGRect(x: header.bounds.origin.x + 20, y: header.bounds.origin.y, width: 100, height: header.bounds.height)
-        header.textLabel?.textColor = .black
+        header.textLabel?.textColor = .label
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
@@ -358,6 +387,13 @@ enum AddItemTableSection: CaseIterable {
 }
 
 
+// MARK: - Enum: AddPlanViewController를 수정 / 생성을 구분하기 위한 열거형
+enum AddPlanMode {
+    case create
+    case edit
+}
+
+
 
 // MARK: - Extension: BookCellDelegate
 extension AddPlanViewController: BookCellDelegate {
@@ -388,6 +424,7 @@ extension AddPlanViewController: DateCellDelegate {
     func didSelectedDate(with type: DateType, date: Date) {
         
         switch type {
+            
         case .startDate:
             //readItem.startDate = date
             viewModel.newCreatedItem.startDate = date
@@ -399,6 +436,7 @@ extension AddPlanViewController: DateCellDelegate {
             viewModel.validReadItemForm()
             viewModel.validDateForm()
         }
+        
         // selectedDates[type] = date
         // printSelectedDates()
     }
@@ -420,7 +458,8 @@ extension AddPlanViewController: DateCellDelegate {
 }
 
 
-// MARK: - Extension: 경고창 메서드 구현 
+
+// MARK: - Extension: 경고창 메서드 구현
 extension AddPlanViewController {
     /// 경고창
     private func showAlert(title: String, message: String) {
@@ -430,6 +469,7 @@ extension AddPlanViewController {
         present(alert, animated: true, completion: nil)
     }
 }
+
 
 
 // MARK: - Extension: Toast 메세지 기능 구현
@@ -472,3 +512,5 @@ extension UIViewController {
         }
     }
 }
+
+

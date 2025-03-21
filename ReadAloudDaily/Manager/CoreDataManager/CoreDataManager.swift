@@ -17,7 +17,7 @@ final class CoreDataManager {
     static let shared: CoreDataManager = CoreDataManager()
     
     // CRUD 목적의 viewcontext 호출
-    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     
     // MARK: - Functions: Core Data CRUD

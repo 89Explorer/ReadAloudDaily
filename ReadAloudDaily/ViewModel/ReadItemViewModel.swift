@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import UIKit
+import CoreData
 
 
 class ReadItemViewModel: ObservableObject {
@@ -28,12 +29,13 @@ class ReadItemViewModel: ObservableObject {
     @Published var isDateValid: Bool = false
     
     private var cancellables: Set<AnyCancellable> = []
-    private let coredataManager = CoreDataManager.shared
+    let coredataManager = CoreDataManager.shared
     
     
     // MARK: - Init
     init() {
         setupBindings()
+        observeCoreDataChanges()
     }
     
     /// 유효성 검사 진행 - (newCreatedItem이 변경될 때 실행)
@@ -52,10 +54,10 @@ class ReadItemViewModel: ObservableObject {
         guard newCreatedItem.title.count >= 1,
               newCreatedItem.endDate > newCreatedItem.startDate,
               newCreatedItem.dailyReadingTime >= 59 else {
-                  isFormValid = false
-                  print("❌ 유효성 검사 실패: 제목 1자 이상, 독서 시간 1분 이상 필요")
-                  return
-              }
+            isFormValid = false
+            print("❌ 유효성 검사 실패: 제목 1자 이상, 독서 시간 1분 이상 필요")
+            return
+        }
         
         isFormValid = true
         print("✅ 유효성 검사 통과")
@@ -71,7 +73,7 @@ class ReadItemViewModel: ObservableObject {
         isDateValid = true
         print("✅ 날짜 유요성 통과")
     }
-
+    
     
     // MARK: - Functions: CRUD
     // 새 독서계획을 저장하는 메서드
@@ -173,6 +175,17 @@ class ReadItemViewModel: ObservableObject {
             } receiveValue: { [weak self] in
                 print("📌 ReadItemViewModel: readItems 배열에서 삭제 - ID: \(id)")
                 self?.readItems.removeAll { $0.id.uuidString == id }
+            }
+            .store(in: &cancellables)
+    }
+    
+    /// 🧮 CoreData 변경 감지, 메서드 
+    private func observeCoreDataChanges() {
+        NotificationCenter.default.publisher(for: .NSManagedObjectContextDidSave, object: coredataManager.context)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                print("🔄 CoreData 변경 감지 - 데이터 재로딩")
+                self?.fetchReadItems()
             }
             .store(in: &cancellables)
     }

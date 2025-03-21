@@ -70,7 +70,8 @@ class DateCell: UITableViewCell {
     func configure(with type: DateType, date: Date?) {
         self.dateType = type
         dateLabel.text = type.title
-        datePicker.countDownDuration = date?.timeIntervalSince1970 ?? 0
+        datePicker.date = date ?? Date()
+        //datePicker.countDownDuration = date?.timeIntervalSince1970 ?? 0
     }
     
     

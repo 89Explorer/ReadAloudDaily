@@ -8,13 +8,15 @@
 import UIKit
 
 class TimerViewController: UIViewController {
-
+    
     
     // MARK: - Variable
     private var readItem: ReadItemModel
     private var timerCounting: Bool = false
     private var remainingSeconds: Int = 0
     private var scheduledTimer: Timer?
+    private let startDateKey = "timer_start_date_key"
+    
     
     private let userDefaults = UserDefaults.standard
     private let remaining_Time_Key: String = "remaining_Time_key"
@@ -49,30 +51,22 @@ class TimerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.setupBackButton()
+        //self.setupBackButton()
         self.setupUI()
         configure()
         view.backgroundColor = .systemBrown
         
-        
-        if userDefaults.object(forKey: remaining_Time_Key) == nil {
-            let readTime = Int(readItem.dailyReadingTime)
-            remainingSeconds = readTime
-            userDefaults.set(readTime, forKey: remaining_Time_Key)
-        } else {
-            remainingSeconds = userDefaults.integer(forKey: remaining_Time_Key)
-        }
-        
-        self.updateLabel()
+        // remainingSeconds 복원
+        remainingSeconds = userDefaults.integer(forKey: remaining_Time_Key)
+        updateLabel()
         
         timerCounting = userDefaults.bool(forKey: counting_Key)
-    
         
         if timerCounting {
-            print("🚙 Timer 시작")
+            print("🚙 타이머 실행 중 → 타이머 복구")
             startTimer()
         } else {
-            print("🚗 Timer 정지")
+            print("🚗 타이머 멈춘 상태 → 대기")
             stopTimer()
         }
         
@@ -81,11 +75,25 @@ class TimerViewController: UIViewController {
     }
     
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if self.isMovingFromParent {
+            if timerCounting {
+                startTimer()
+            } else {
+                stopTimer()
+            }
+        }
+    }
+    
+    
+    
     // MARK: - Functions
     func configure() {
         titleLabel.text = "Read Mode"
     }
-
+    
 }
 
 
@@ -93,6 +101,9 @@ class TimerViewController: UIViewController {
 extension TimerViewController {
     
     func startTimer() {
+        // 시작 시간 저장
+        userDefaults.set(Date(), forKey: startDateKey)
+        
         scheduledTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(refreshValue), userInfo: nil, repeats: true)
         setTimeCounting(true)
         startStopButton.setTitle("PAUSE", for: .normal)
@@ -100,11 +111,22 @@ extension TimerViewController {
     }
     
     func stopTimer() {
+        if let startDate = userDefaults.object(forKey: startDateKey) as? Date {
+            let elapsed = Int(Date().timeIntervalSince(startDate))
+            remainingSeconds -= elapsed
+            userDefaults.set(remainingSeconds, forKey: remaining_Time_Key)
+        }
+        
         scheduledTimer?.invalidate()
+        userDefaults.removeObject(forKey: startDateKey)
         setTimeCounting(false)
+        
         startStopButton.setTitle("START", for: .normal)
         startStopButton.setTitleColor(.white, for: .normal)
+        updateLabel()
     }
+    
+    
     
     /// 타이머 실행 상태를 변경하는 메서드
     func setTimeCounting(_ value: Bool) {
@@ -124,20 +146,25 @@ extension TimerViewController {
     func makeTimeString(hour: Int, min: Int, sec: Int) -> String {
         return String(format: "%02d:%02d:%02d", hour, min, sec)
     }
-
+    
     func updateLabel() {
         let time = secondsToHoursMinutesSeconds(remainingSeconds)
         timeLabel.text = makeTimeString(hour: time.0, min: time.1, sec: time.2)
     }
     
     @objc private func refreshValue() {
-        if remainingSeconds > 0 {
-            remainingSeconds -= 1
-            userDefaults.set(remainingSeconds, forKey: remaining_Time_Key)
-            updateLabel()
-        } else {
-            print("✅ 타이머 완료 ✅")
-            stopTimer()
+        if let startDate = userDefaults.object(forKey: startDateKey) as? Date {
+            let elapsed = Int(Date().timeIntervalSince(startDate))
+            let updatedRemaining = remainingSeconds - elapsed
+            
+            if updatedRemaining > 0 {
+                let setTime = secondsToHoursMinutesSeconds(updatedRemaining)
+                timeLabel.text = makeTimeString(hour: setTime.0, min: setTime.1, sec: setTime.2)
+            } else {
+                print("✅ 타이머 완료 ✅")
+                stopTimer()
+                timeLabel.text = "00:00:00"
+            }
         }
     }
     
@@ -154,7 +181,8 @@ extension TimerViewController {
     
     @objc func resetAction() {
         stopTimer()
-        remainingSeconds = 0
+        let readTime = Int(readItem.dailyReadingTime)
+        remainingSeconds = readTime
         userDefaults.set(remainingSeconds, forKey: remaining_Time_Key)
         updateLabel()
     }
@@ -174,7 +202,7 @@ extension TimerViewController {
         timeLabel.textAlignment = .center
         timeLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 80)
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
-
+        
         
         let config = UIImage.SymbolConfiguration(pointSize: 40)
         let targetImage = UIImage(systemName: "book", withConfiguration: config)
@@ -214,7 +242,7 @@ extension TimerViewController {
         resetButton.layer.cornerRadius = 20
         resetButton.layer.masksToBounds = true
         
-    
+        
         innerStackView.axis = .horizontal
         innerStackView.distribution = .fillEqually
         innerStackView.spacing = 30

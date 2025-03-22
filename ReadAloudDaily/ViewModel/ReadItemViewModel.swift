@@ -158,7 +158,7 @@ class ReadItemViewModel: ObservableObject {
     }
     
     
-    // 저장된 독서계획을 삭제하는 메서드
+    /// 저장된 독서계획을 삭제하는 메서드
     func deleteReadItem(with id: String) {
         
         print("📤 ReadItemViewModel: 독서 계획 삭제 요청 - ID: \(id)")

@@ -41,6 +41,7 @@ class ReadItemCell: UITableViewCell {
         setupUI()
         
         didTappedSettingButton()
+        didTappedStartButton()
     }
     
     
@@ -82,7 +83,7 @@ class ReadItemCell: UITableViewCell {
         startReadButton.setTitleColor(.label, for: .normal)
         startReadButton.tintColor = .label
         startReadButton.backgroundColor = .systemBackground
-        startReadButton.layer.cornerRadius = 25
+        startReadButton.layer.cornerRadius = 20
         startReadButton.layer.masksToBounds = true
         startReadButton.translatesAutoresizingMaskIntoConstraints = false
         
@@ -158,6 +159,8 @@ class ReadItemCell: UITableViewCell {
     
 }
 
+
+
 // MARK: - Extension: 날짜 및 완료 횟수 설정 메서드
 extension ReadItemCell {
     
@@ -183,6 +186,7 @@ extension ReadItemCell {
 }
 
 
+
 // MARK: - Extension: settingButton 메서드 적용 
 extension ReadItemCell {
     
@@ -194,6 +198,15 @@ extension ReadItemCell {
         guard let item = currentItem else { return }
         delegate?.didTappedSettingButton(for: item, from: settingButton)
     }
+    
+    private func didTappedStartButton() {
+        startReadButton.addTarget(self, action: #selector(tappedStartButton), for: .touchUpInside)
+    }
+    
+    @objc private func tappedStartButton() {
+        guard let item = currentItem else { return }
+        delegate?.didTappedStartButton(for: item, from: startReadButton)
+    }
 }
 
 
@@ -201,6 +214,6 @@ extension ReadItemCell {
 // MARK: - Protocol: settingButton을 눌렀을 때 동작할 델리게이트 패턴
 protocol ReadItemSettingButtonDelegate: AnyObject {
     func didTappedSettingButton(for item: ReadItemModel, from sender: UIButton)
+    func didTappedStartButton(for item: ReadItemModel, from sender: UIButton)
 }
-
 

@@ -242,6 +242,24 @@ enum ReadItemTableSection: CaseIterable {
 // MARK: - Extension: ReadItemSettingButtonDelegate
 extension HomeViewController: ReadItemSettingButtonDelegate {
     
+    func didTappedStartButton(for item: ReadItemModel, from sender: UIButton) {
+        print("⏰ 타이머 버튼 누름 - ID: \(item.id)")
+        
+        let timerVC = TimerViewController(readItem: item)
+        
+        if let sheet = timerVC.sheetPresentationController {
+            sheet.detents = [
+                .custom { _ in
+                    450.0
+                }
+            ]
+            sheet.preferredCornerRadius = 25
+            sheet.prefersGrabberVisible = true
+        }
+        self.present(timerVC, animated: true)
+    }
+    
+    
     func didTappedSettingButton(for item: ReadItemModel, from sender: UIButton) {
         print("⚙️ 설정 버튼 누름 - ID: \(item.id)")
         
@@ -280,6 +298,7 @@ extension HomeViewController: ReadItemSettingButtonDelegate {
         present(alert, animated: true, completion: nil)
         
     }
+    
 }
 
 

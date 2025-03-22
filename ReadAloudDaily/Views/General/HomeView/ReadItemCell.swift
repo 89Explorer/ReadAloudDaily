@@ -61,18 +61,18 @@ class ReadItemCell: UITableViewCell {
     private func setupUI() {
         //titleLabel.text = "해리포터 돌의 시리즈 해리포터 돌의 시리즈"
         titleLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        titleLabel.textColor = .label
+        titleLabel.textColor = .black
         titleLabel.numberOfLines = 0
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
         //dateLabel.text = "📅: 3월 12일 ~ 3월 20일"
         dateLabel.font =  UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 16)
-        dateLabel.textColor = .label
+        dateLabel.textColor = .black
         dateLabel.numberOfLines = 1
         
         //timeLabel.text = "⏰: 30분"
         timeLabel.font =  UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 16)
-        timeLabel.textColor = .label
+        timeLabel.textColor = .black
         timeLabel.numberOfLines = 1
         
         //completeLabel.text = "⚪️ ⚪️ ⚪️ ⚪️ ⚪️"

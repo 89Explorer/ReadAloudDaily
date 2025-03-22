@@ -41,7 +41,7 @@ class BookCell: UITableViewCell {
         titleTextField.leftViewMode = .always
         titleTextField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 5))
         titleTextField.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        titleTextField.textColor = .label
+        titleTextField.textColor = .black
         titleTextField.addTarget(self, action: #selector(textChanged), for: .editingChanged)
         titleTextField.translatesAutoresizingMaskIntoConstraints = false
         

@@ -196,7 +196,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else { return }
         header.textLabel?.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        header.textLabel?.textColor = .label
+        header.textLabel?.textColor = .black
     }
 }
 
@@ -213,7 +213,7 @@ extension HomeViewController {
         let titleLabel: UILabel = UILabel()
         titleLabel.text = dateString
         titleLabel.font = UIFont.boldSystemFont(ofSize: 28)
-        titleLabel.textColor = .label
+        titleLabel.textColor = .black
         
         let leftBarButton = UIBarButtonItem(customView: titleLabel)
         navigationItem.leftBarButtonItem = leftBarButton

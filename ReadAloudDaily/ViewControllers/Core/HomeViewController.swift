@@ -32,7 +32,7 @@ class HomeViewController: UIViewController {
         
         setupNavigationLeftTitle()
         setupBinding()
-    
+
         //testViewBinding()
     }
     

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AudioToolbox
 
 
 class TimerViewController: UIViewController {
@@ -63,6 +64,8 @@ class TimerViewController: UIViewController {
         
         updateButtonUI()
         configureBackBarButton()
+        
+        NotificationPermissionManager.checkAndRequestPermission(from: self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -108,16 +111,25 @@ class TimerViewController: UIViewController {
 extension TimerViewController {
     
     func startTimer() {
+        guard remainingSeconds > 0 else {
+            print("⛔️ 타이머 시작 불가: 남은 시간이 0 이하임 (\(remainingSeconds))")
+            return
+        }
+
         if userDefaults.object(forKey: startDateKey) == nil {
             userDefaults.set(Date(), forKey: startDateKey)
-            baseRemainingSeconds = remainingSeconds // 현재 값을 기준으로 삼음
+            baseRemainingSeconds = remainingSeconds
         }
-        
+
         scheduledTimer?.invalidate()
         scheduledTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(refreshValue), userInfo: nil, repeats: true)
         setTimeCounting(true)
         updateButtonUI()
+        
+        scheduleLocalNotification(after: remainingSeconds)
+        
     }
+
     
     func stopTimer() {
         if let startDate = userDefaults.object(forKey: startDateKey) as? Date {
@@ -132,6 +144,7 @@ extension TimerViewController {
         setTimeCounting(false)
         updateButtonUI()
         updateLabel()
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["timer_\(readItem.id)"])
     }
     
     func setTimeCounting(_ value: Bool) {
@@ -158,6 +171,33 @@ extension TimerViewController {
         startStopButton.tintColor = .white
     }
     
+    // 알람이 완료되면 경고창 띄우기
+    func presentTimerFinishedAlert() {
+        let alert = UIAlertController(title: "타이머 종료", message: "읽기 시간이 완료되었습니다!", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
+    }
+    
+    // 백그라운드에 앱이 있을 때 대비하여 알림 서비스 등록
+    func scheduleLocalNotification(after seconds: Int) {
+        guard seconds > 0 else {
+            print("⚠️ 알림 예약 실패: seconds가 0 이하입니다 (\(seconds))")
+            return
+        }
+
+        let content = UNMutableNotificationContent()
+        content.title = "타이머 종료"
+        content.body = "\(readItem.title) 읽기 시간이 끝났어요!"
+        content.sound = .default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(seconds), repeats: false)
+        let request = UNNotificationRequest(identifier: "timer_\(readItem.id)", content: content, trigger: trigger)
+
+        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+    }
+
+    
+    
     @objc func refreshValue() {
         guard let startDate = userDefaults.object(forKey: startDateKey) as? Date else { return }
         
@@ -170,12 +210,22 @@ extension TimerViewController {
         } else {
             stopTimer()
             timeLabel.text = "00:00:00"
+            presentTimerFinishedAlert()
+            AudioServicesPlaySystemSound(SystemSoundID(1005))
         }
     }
+    
+    
 
     
     @objc func startStopAction() {
-        timerCounting ? stopTimer() : startTimer()
+        
+        if timerCounting {
+            stopTimer()
+        } else {
+            startTimer()
+        }
+
     }
     
     @objc func resetAction() {
@@ -183,6 +233,7 @@ extension TimerViewController {
         remainingSeconds = Int(readItem.dailyReadingTime)
         userDefaults.set(remainingSeconds, forKey: remainingTimeKey)
         updateLabel()
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["timer_\(readItem.id)"])
     }
     
     func secondsToHoursMinutesSeconds(_ seconds: Int) -> (Int, Int, Int) {

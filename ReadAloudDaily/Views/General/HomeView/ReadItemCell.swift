@@ -34,7 +34,7 @@ class ReadItemCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         backgroundColor = .clear
-        contentView.backgroundColor = .systemYellow
+        contentView.backgroundColor = .white.withAlphaComponent(0.5)
         contentView.layer.cornerRadius = 10
         contentView.layer.masksToBounds = true
         

@@ -26,12 +26,13 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = UIColor(named: "SheetBackgroundColor")
+        view.backgroundColor = .systemGreen
         didTappedAddItemButton()
         setupUI()
         
         setupNavigationLeftTitle()
         setupBinding()
+    
         //testViewBinding()
     }
     
@@ -303,9 +304,6 @@ extension HomeViewController: ReadItemSettingButtonDelegate {
     }
     
 }
-
-
-
 
 
 

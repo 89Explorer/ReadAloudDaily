@@ -7,31 +7,33 @@
 
 import UIKit
 
+
 class TimerViewController: UIViewController {
-    
     
     // MARK: - Variable
     private var readItem: ReadItemModel
     private var timerCounting: Bool = false
     private var remainingSeconds: Int = 0
     private var scheduledTimer: Timer?
-    private let startDateKey = "timer_start_date_key"
+    private var baseRemainingSeconds: Int = 0
+
     
-    
+    private let startDateKeyPrefix = "timer_start_date_key_"
     private let userDefaults = UserDefaults.standard
-    private let remaining_Time_Key: String = "remaining_Time_key"
-    private let counting_Key: String = "counting_Key"
     
+    private var remainingTimeKey: String { "remaining_Time_\(readItem.id)" }
+    private var countingKey: String { "counting_Key_\(readItem.id)" }
+    private var startDateKey: String { startDateKeyPrefix + "\(readItem.id)" }
     
     // MARK: - UI Component
-    private let timeLabel: UILabel = UILabel()
-    private let titleView: UIView = UIView()
-    private let targetImageView: UIImageView = UIImageView()
     private let titleLabel: UILabel = UILabel()
-    private var titleStack: UIStackView = UIStackView()
-    private var startStopButton: UIButton = UIButton(type: .system)
-    private var resetButton: UIButton = UIButton(type: .system)
-    private var innerStackView: UIStackView = UIStackView()
+    private let timeLabel: UILabel = UILabel()
+    private let progressLayer: CAShapeLayer = CAShapeLayer()
+    private let trackLayer: CAShapeLayer = CAShapeLayer()
+    private let modeLabel: UILabel = UILabel()
+    private let iconImageView = UIImageView()
+    private let startStopButton: UIButton = UIButton(type: .system)
+    private let resetButton: UIButton = UIButton(type: .system)
     
     
     
@@ -50,287 +52,282 @@ class TimerViewController: UIViewController {
     // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        //self.setupBackButton()
-        self.setupUI()
+        setupUI()
         configure()
-        view.backgroundColor = .systemBrown
+        view.backgroundColor = .systemGreen
         
-        // remainingSeconds 복원
-        remainingSeconds = userDefaults.integer(forKey: remaining_Time_Key)
-        updateLabel()
-        
-        timerCounting = userDefaults.bool(forKey: counting_Key)
-        
-        if timerCounting {
-            print("🚙 타이머 실행 중 → 타이머 복구")
-            startTimer()
-        } else {
-            print("🚗 타이머 멈춘 상태 → 대기")
-            stopTimer()
-        }
+        restoreTimerState()
         
         startStopButton.addTarget(self, action: #selector(startStopAction), for: .touchUpInside)
         resetButton.addTarget(self, action: #selector(resetAction), for: .touchUpInside)
+        
+        updateButtonUI()
+        configureBackBarButton()
     }
     
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
-        if self.isMovingFromParent {
-            if timerCounting {
-                startTimer()
-            } else {
-                stopTimer()
-            }
+        if userDefaults.bool(forKey: countingKey) {
+            print("📲 복귀 시 타이머 복원")
+            refreshValue() // 먼저 label 즉시 업데이트
+            startTimer() // 다시 화면 진입 시 자동 재시작 (백그라운드 포함)
+        } else {
+            updateLabel() // PAUSE 상태라면 그냥 라벨만 업데이트
         }
     }
     
     
-    
     // MARK: - Functions
-    func configure() {
-        titleLabel.text = "Read Mode"
+    private func restoreTimerState() {
+        remainingSeconds = userDefaults.integer(forKey: remainingTimeKey)
+        timerCounting = userDefaults.bool(forKey: countingKey)
+        
+        // 💡 여기가 중요! 복귀 시에도 기준 시간 다시 설정
+        if let startDate = userDefaults.object(forKey: remainingTimeKey) as? Date {
+            let elapsed = Int(Date().timeIntervalSince(startDate))
+            baseRemainingSeconds = remainingSeconds + elapsed
+        } else {
+            baseRemainingSeconds = remainingSeconds
+        }
+        
+        updateLabel()
     }
+
     
+    private func configure() {
+        titleLabel.text = readItem.title
+        modeLabel.text = "Read Mode"
+        iconImageView.image = UIImage(systemName: "book")
+    }
 }
 
 
-// MARK: - Extension: 타이머 설정 함수
+
+// MARK: - 타이머 관련 메서드
 extension TimerViewController {
     
     func startTimer() {
-        // 시작 시간 저장
-        userDefaults.set(Date(), forKey: startDateKey)
+        if userDefaults.object(forKey: startDateKey) == nil {
+            userDefaults.set(Date(), forKey: startDateKey)
+            baseRemainingSeconds = remainingSeconds // 현재 값을 기준으로 삼음
+        }
         
+        scheduledTimer?.invalidate()
         scheduledTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(refreshValue), userInfo: nil, repeats: true)
         setTimeCounting(true)
-        startStopButton.setTitle("PAUSE", for: .normal)
-        startStopButton.setTitleColor(.systemRed, for: .normal)
+        updateButtonUI()
     }
     
     func stopTimer() {
         if let startDate = userDefaults.object(forKey: startDateKey) as? Date {
             let elapsed = Int(Date().timeIntervalSince(startDate))
-            remainingSeconds -= elapsed
-            userDefaults.set(remainingSeconds, forKey: remaining_Time_Key)
+            baseRemainingSeconds -= elapsed
+            remainingSeconds = baseRemainingSeconds
+            userDefaults.set(remainingSeconds, forKey: remainingTimeKey)
         }
-        
+
         scheduledTimer?.invalidate()
         userDefaults.removeObject(forKey: startDateKey)
         setTimeCounting(false)
-        
-        startStopButton.setTitle("START", for: .normal)
-        startStopButton.setTitleColor(.white, for: .normal)
+        updateButtonUI()
         updateLabel()
     }
     
-    
-    
-    /// 타이머 실행 상태를 변경하는 메서드
     func setTimeCounting(_ value: Bool) {
         timerCounting = value
-        userDefaults.set(timerCounting, forKey: counting_Key)
-    }
-    
-    /// 초 단위 시간을 시간:분:초로 변환하는 메서드
-    func secondsToHoursMinutesSeconds(_ seconds: Int) -> (Int, Int, Int) {
-        let hour = seconds / 3600
-        let min = (seconds % 3600) / 60
-        let sec = (seconds % 3600) % 60
-        return (hour, min, sec)
-    }
-    
-    /// 시간을 00:00:00 형식의 문자열로 변환하는 메서드
-    func makeTimeString(hour: Int, min: Int, sec: Int) -> String {
-        return String(format: "%02d:%02d:%02d", hour, min, sec)
+        userDefaults.set(value, forKey: countingKey)
     }
     
     func updateLabel() {
         let time = secondsToHoursMinutesSeconds(remainingSeconds)
         timeLabel.text = makeTimeString(hour: time.0, min: time.1, sec: time.2)
+        updateProgress()
     }
     
-    @objc private func refreshValue() {
-        if let startDate = userDefaults.object(forKey: startDateKey) as? Date {
-            let elapsed = Int(Date().timeIntervalSince(startDate))
-            let updatedRemaining = remainingSeconds - elapsed
-            
-            if updatedRemaining > 0 {
-                let setTime = secondsToHoursMinutesSeconds(updatedRemaining)
-                timeLabel.text = makeTimeString(hour: setTime.0, min: setTime.1, sec: setTime.2)
-            } else {
-                print("✅ 타이머 완료 ✅")
-                stopTimer()
-                timeLabel.text = "00:00:00"
-            }
+    func updateProgress() {
+        let total = max(Int(readItem.dailyReadingTime), 1)
+        let progress = CGFloat(total - remainingSeconds) / CGFloat(total)
+        progressLayer.strokeEnd = progress
+    }
+    
+    func updateButtonUI() {
+        let config = UIImage.SymbolConfiguration(pointSize: 32, weight: .bold)
+        let symbolName = timerCounting ? "pause.fill" : "play.fill"
+        startStopButton.setImage(UIImage(systemName: symbolName, withConfiguration: config), for: .normal)
+        startStopButton.tintColor = .white
+    }
+    
+    @objc func refreshValue() {
+        guard let startDate = userDefaults.object(forKey: startDateKey) as? Date else { return }
+        
+        let elapsed = Int(Date().timeIntervalSince(startDate))
+        let updatedRemaining = baseRemainingSeconds - elapsed
+
+        if updatedRemaining > 0 {
+            remainingSeconds = updatedRemaining
+            updateLabel()
+        } else {
+            stopTimer()
+            timeLabel.text = "00:00:00"
         }
     }
+
     
     @objc func startStopAction() {
-        if timerCounting {
-            stopTimer()
-        } else {
-            if remainingSeconds > 0 {
-                userDefaults.set(remainingSeconds, forKey: remaining_Time_Key)
-            }
-            startTimer()
-        }
+        timerCounting ? stopTimer() : startTimer()
     }
     
     @objc func resetAction() {
         stopTimer()
-        let readTime = Int(readItem.dailyReadingTime)
-        remainingSeconds = readTime
-        userDefaults.set(remainingSeconds, forKey: remaining_Time_Key)
+        remainingSeconds = Int(readItem.dailyReadingTime)
+        userDefaults.set(remainingSeconds, forKey: remainingTimeKey)
         updateLabel()
     }
     
+    func secondsToHoursMinutesSeconds(_ seconds: Int) -> (Int, Int, Int) {
+        (seconds / 3600, (seconds % 3600) / 60, (seconds % 3600) % 60)
+    }
+    
+    func makeTimeString(hour: Int, min: Int, sec: Int) -> String {
+        String(format: "%02d:%02d:%02d", hour, min, sec)
+    }
 }
 
 
 
-
-// MARK: - Extension: Setup UI 설정
+// MARK: - UI 구성
 extension TimerViewController {
     
     private func setupUI() {
         
-        timeLabel.text = "00:00:00"
-        timeLabel.textColor = .black
+        titleLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 50)
+        titleLabel.textColor = .white
+        titleLabel.numberOfLines = 0
+        titleLabel.textAlignment = .center
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        modeLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
+        modeLabel.textColor = .white
+        modeLabel.textAlignment = .center
+        modeLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        iconImageView.tintColor = .white
+        iconImageView.contentMode = .scaleAspectFit
+        iconImageView.isUserInteractionEnabled = false
+        iconImageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        timeLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 70)
+        timeLabel.textColor = .white
         timeLabel.textAlignment = .center
-        timeLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 80)
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
         
+        // Circular Progress Path
+        let center = view.center
+        let radius: CGFloat = 150
+        let circularPath = UIBezierPath(
+            arcCenter: .zero,
+            radius: radius,
+            startAngle: -.pi / 2,
+            endAngle: 1.5 * .pi,
+            clockwise: true)
         
-        let config = UIImage.SymbolConfiguration(pointSize: 40)
-        let targetImage = UIImage(systemName: "book", withConfiguration: config)
+        trackLayer.path = circularPath.cgPath
+        trackLayer.strokeColor = UIColor.lightGray.cgColor
+        trackLayer.lineWidth = 15
+        trackLayer.fillColor = UIColor.clear.cgColor
+        trackLayer.lineCap = .round
+        trackLayer.position = center
+        view.layer.addSublayer(trackLayer)
         
+        progressLayer.path = circularPath.cgPath
+        progressLayer.strokeColor = UIColor.white.cgColor
+        progressLayer.lineWidth = 20
+        progressLayer.fillColor = UIColor.clear.cgColor
+        progressLayer.lineCap = .round
+        progressLayer.strokeEnd = 0
+        progressLayer.position = center
+        view.layer.addSublayer(progressLayer)
         
-        targetImageView.image = targetImage
-        targetImageView.tintColor = .black
-        targetImageView.contentMode = .scaleAspectFit
-        targetImageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        
-        titleLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 18)
-        titleLabel.numberOfLines = 2
-        titleLabel.textColor = .black
-        titleLabel.textAlignment = .center
-        
-        
-        titleStack.axis = .vertical
-        titleStack.spacing = 5
-        titleStack.alignment = .center
-        titleStack.distribution = .fill
-        titleStack.translatesAutoresizingMaskIntoConstraints = false
-        
-        
-        startStopButton.setTitle("START", for: .normal)
-        startStopButton.setTitleColor(.white, for: .normal)
-        startStopButton.backgroundColor = .systemGreen
-        startStopButton.titleLabel?.font = .systemFont(ofSize: 40, weight: .bold)
-        startStopButton.layer.cornerRadius = 20
-        startStopButton.layer.masksToBounds = true
-        
-        
-        resetButton.setTitle("RESET", for: .normal)
-        resetButton.setTitleColor(.white, for: .normal)
-        resetButton.backgroundColor = .systemRed
-        resetButton.titleLabel?.font = .systemFont(ofSize: 40, weight: .bold)
-        resetButton.layer.cornerRadius = 20
-        resetButton.layer.masksToBounds = true
+       
+        let config = UIImage.SymbolConfiguration(pointSize: 32, weight: .bold)
+        startStopButton.setImage(UIImage(systemName: "play.fil", withConfiguration: config), for: .normal)
+        startStopButton.tintColor = .white
+        startStopButton.backgroundColor = .white.withAlphaComponent(0.3)
+        startStopButton.layer.cornerRadius = 45
+        startStopButton.clipsToBounds = true
+        startStopButton.translatesAutoresizingMaskIntoConstraints = false
         
         
-        innerStackView.axis = .horizontal
-        innerStackView.distribution = .fillEqually
-        innerStackView.spacing = 30
-        innerStackView.translatesAutoresizingMaskIntoConstraints = false
+        resetButton.setImage(UIImage(systemName: "stop.fill", withConfiguration: config),for: .normal)
+        resetButton.tintColor = .white
+        resetButton.backgroundColor = .white.withAlphaComponent(0.3)
+        resetButton.layer.cornerRadius = 45
+        resetButton.clipsToBounds = true
+        resetButton.translatesAutoresizingMaskIntoConstraints = false
         
+        
+        view.addSubview(titleLabel)
+        view.addSubview(modeLabel)
+        view.addSubview(iconImageView)
         view.addSubview(timeLabel)
-        view.addSubview(titleStack)
-        titleStack.addArrangedSubview(titleLabel)
-        titleStack.addArrangedSubview(targetImageView)
-        
-        
-        innerStackView.addArrangedSubview(startStopButton)
-        innerStackView.addArrangedSubview(resetButton)
-        
-        view.addSubview(innerStackView)
+        view.addSubview(startStopButton)
+        view.addSubview(resetButton)
         
         NSLayoutConstraint.activate([
+            
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 30),
+            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 15),
+            
+            modeLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 15),
+            modeLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            modeLabel.widthAnchor.constraint(equalToConstant: 200),
+            
+            iconImageView.topAnchor.constraint(equalTo: modeLabel.bottomAnchor, constant: 10),
+            iconImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            iconImageView.widthAnchor.constraint(equalToConstant: 50),
+            iconImageView.heightAnchor.constraint(equalToConstant: 50),
             
             timeLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            timeLabel.widthAnchor.constraint(equalToConstant: 350),
-            timeLabel.heightAnchor.constraint(equalToConstant: 100),
-            timeLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 80),
+            timeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
-            titleStack.centerXAnchor.constraint(equalTo: timeLabel.centerXAnchor),
-            titleStack.widthAnchor.constraint(equalToConstant: 100),
-            titleStack.heightAnchor.constraint(equalToConstant: 100),
-            titleStack.topAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 10),
+            startStopButton.topAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 180),
+            startStopButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 90),
+            startStopButton.heightAnchor.constraint(equalToConstant: 90),
+            startStopButton.widthAnchor.constraint(equalToConstant: 90),
             
-            innerStackView.centerXAnchor.constraint(equalTo: titleStack.centerXAnchor),
-            innerStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 30),
-            innerStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30),
-            innerStackView.heightAnchor.constraint(equalToConstant: 50),
-            innerStackView.topAnchor.constraint(equalTo: titleStack.bottomAnchor, constant: 60)
+            
+            resetButton.topAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 180),
+            resetButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -90),
+            resetButton.heightAnchor.constraint(equalToConstant: 90),
+            resetButton.widthAnchor.constraint(equalToConstant: 90)
             
         ])
+    }
+    
+    
+    // 뒤로가기 버튼 커스텀 메서드
+    private func configureBackBarButton() {
+        let config = UIImage.SymbolConfiguration(pointSize: 22, weight: .bold)
+        let backImage = UIImage(systemName: "chevron.left", withConfiguration: config)
+
+        let backButton = UIButton(type: .system)
+        backButton.setImage(backImage, for: .normal)
+        backButton.tintColor = .white
+        backButton.addTarget(self, action: #selector(handleBackButtonTapped), for: .touchUpInside)
+
+        let backBarItem = UIBarButtonItem(customView: backButton)
+        navigationItem.leftBarButtonItem = backBarItem
+    }
+
+    @objc private func handleBackButtonTapped() {
+        navigationController?.popViewController(animated: true)
     }
 }
 
 
 
 
-
-// MARK: - Extension: 뒤로가기 버튼 설정
-extension TimerViewController {
-    
-    // MARK: - 뒤로가기 버튼 설정
-    private func setupBackButton() {
-        
-        let config = UIImage.SymbolConfiguration(pointSize: 15, weight: .bold)
-        let xmarkImage = UIImage(systemName: "xmark", withConfiguration: config)
-        
-        let customView = UIView()
-        customView.backgroundColor = .systemBackground
-        customView.layer.cornerRadius = 15
-        customView.clipsToBounds = true
-        customView.translatesAutoresizingMaskIntoConstraints = false
-        
-        let xmarkImageView = UIImageView(image: xmarkImage)
-        xmarkImageView.tintColor = .label
-        xmarkImageView.translatesAutoresizingMaskIntoConstraints = false
-        xmarkImageView.isUserInteractionEnabled = true
-        
-        view.addSubview(customView)
-        customView.addSubview(xmarkImageView)
-        
-        NSLayoutConstraint.activate([
-            customView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-            customView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            customView.widthAnchor.constraint(equalToConstant: 30),
-            customView.heightAnchor.constraint(equalToConstant: 30),
-            
-            xmarkImageView.centerXAnchor.constraint(equalTo: customView.centerXAnchor),
-            xmarkImageView.centerYAnchor.constraint(equalTo: customView.centerYAnchor),
-            xmarkImageView.widthAnchor.constraint(equalToConstant: 15),
-            xmarkImageView.heightAnchor.constraint(equalToConstant: 15)
-        ])
-        
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(popVC))
-        customView.addGestureRecognizer(tapGesture)
-        customView.isUserInteractionEnabled = true
-    }
-    
-    
-    // MARK: - Actions
-    /// 뒤로가기 액션
-    @objc private func popVC() {
-        dismiss(animated: true)
-    }
-}
 
 

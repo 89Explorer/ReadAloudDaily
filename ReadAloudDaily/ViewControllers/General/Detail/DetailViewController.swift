@@ -40,8 +40,11 @@ class DetailViewController: UIViewController {
         self.configureBackBarButton()
         self.configureNavigationTitle()
         setupUI()
+        
+        DispatchQueue.main.async {
+            self.detailTableView.reloadData()
+        }
     }
-
 }
 
 
@@ -54,6 +57,7 @@ extension DetailViewController {
         detailTableView.showsVerticalScrollIndicator = false
         detailTableView.backgroundColor = .clear
         detailTableView.separatorStyle = .none
+        detailTableView.register(PlanDetailCell.self, forCellReuseIdentifier: PlanDetailCell.reuseIdentifier)
         detailTableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         detailTableView.delegate = self
         detailTableView.dataSource = self
@@ -85,9 +89,11 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = "TEST"
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: PlanDetailCell.reuseIdentifier, for: indexPath) as? PlanDetailCell else { return UITableViewCell() }
+        
+        cell.configure(with: readItem)
         return cell
+        
     }
     
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {

@@ -209,9 +209,9 @@ class ReadItemViewModel: ObservableObject {
     
     
     
-//    func loadCompletedDates(for item: ReadItemModel) -> [String: Bool] {
-//        let key = "completed_dates_\(item.id.uuidString)"
-//        return UserDefaults.standard.dictionary(forKey: key) as? [String: Bool] ?? [:]
-//    }
+    func loadCompletedDates(for item: ReadItemModel) -> [String: Bool] {
+        let key = "completed_dates_\(item.id.uuidString)"
+        return UserDefaults.standard.dictionary(forKey: key) as? [String: Bool] ?? [:]
+    }
 }
 

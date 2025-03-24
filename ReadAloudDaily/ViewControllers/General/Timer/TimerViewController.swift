@@ -20,8 +20,6 @@ class TimerViewController: UIViewController {
     private var scheduledTimer: Timer?
     private var baseRemainingSeconds: Int = 0
     
-    
-    
     private let startDateKeyPrefix = "timer_start_date_key_"
     private let userDefaults = UserDefaults.standard
     

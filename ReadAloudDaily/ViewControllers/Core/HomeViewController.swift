@@ -186,6 +186,23 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
     
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+       
+        let section = ReadItemTableSection.allCases[indexPath.section]
+        
+        switch section {
+        case .progress:
+            let selectedItem = progressReadItems[indexPath.item]
+            let detailVC = DetailViewController(readItem: selectedItem)
+            self.navigationController?.pushViewController(detailVC, animated: true)
+        case .completed:
+            let seletedItem = completedReadItems[indexPath.item]
+            let detailVC = DetailViewController(readItem: seletedItem)
+            self.navigationController?.pushViewController(detailVC, animated: true)
+        }
+        
+    }
+    
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableView.automaticDimension
     }

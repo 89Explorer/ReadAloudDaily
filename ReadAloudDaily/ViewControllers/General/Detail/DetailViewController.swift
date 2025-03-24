@@ -12,7 +12,7 @@ class DetailViewController: UIViewController {
     
     // MARK: - Variable
     private var readItem: ReadItemModel
-    
+    var viewModel = ReadItemViewModel()
     
     // MARK: - UI Component
     private let detailTableView: UITableView = UITableView(frame: .zero, style: .insetGrouped)
@@ -78,6 +78,7 @@ extension DetailViewController {
 
 
 
+// MARK: - Extension: UITableViewDelegate, UITableViewDataSource 델리게이트 설정
 extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -89,10 +90,20 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: PlanDetailCell.reuseIdentifier, for: indexPath) as? PlanDetailCell else { return UITableViewCell() }
         
-        cell.configure(with: readItem)
-        return cell
+        let section = DetailViewSection.allCases[indexPath.section]
+        
+        switch section {
+        case .planInfo:
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: PlanDetailCell.reuseIdentifier, for: indexPath) as? PlanDetailCell else { return UITableViewCell() }
+            
+            cell.configure(with: readItem)
+            cell.delegate = self
+            return cell
+            
+        case .reviewInfo:
+            return UITableViewCell()
+        }
         
     }
     
@@ -146,6 +157,23 @@ extension DetailViewController {
     }
     
 }
+
+
+
+// MARK: - Extension
+extension DetailViewController: FinishedSwitchDelegate {
+    
+    func didfinishedSwitch(_ sender: UISwitch) {
+        if sender.isOn {
+            readItem.isCompleted = sender.isOn
+            viewModel.updateReadItem(readItem)
+        } else {
+            readItem.isCompleted = sender.isOn
+            viewModel.updateReadItem(readItem)
+        }
+    }
+}
+
 
 
 

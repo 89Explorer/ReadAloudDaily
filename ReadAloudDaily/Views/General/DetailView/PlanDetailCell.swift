@@ -15,6 +15,7 @@ class PlanDetailCell: UITableViewCell {
     var readDates: [Date] = []
     var updatedArray: [Bool?] = []
     
+    weak var delegate: FinishedSwitchDelegate?
     
     
     // MARK: - UI Components
@@ -76,6 +77,8 @@ class PlanDetailCell: UITableViewCell {
         }
         
         timePickerView.countDownDuration = readItem.dailyReadingTime
+        
+        finishedSwitch.isOn = readItem.isCompleted
         
         //print("✅ updatedArray: \(updatedArray.count), readDates: \(readDates.count)")
         
@@ -184,6 +187,8 @@ extension PlanDetailCell {
         
         finishedSwitch.isOn = false
         finishedSwitch.onTintColor = .systemGreen
+        finishedSwitch.addTarget(self, action: #selector(selectedFinished), for: .valueChanged)
+        
         
         let finishedStackView: UIStackView = UIStackView()
         finishedStackView.axis = .horizontal
@@ -229,6 +234,12 @@ extension PlanDetailCell {
             finishedSwitch.widthAnchor.constraint(equalToConstant: 60)
         ])
     }
+    
+    
+    // MARK: - Action
+    @objc private func selectedFinished() {
+        delegate?.didfinishedSwitch(finishedSwitch)
+    }
 }
 
 
@@ -252,4 +263,11 @@ extension PlanDetailCell: UICollectionViewDelegate, UICollectionViewDataSource {
         return false // 선택 막기
     }
 
+}
+
+
+
+// MARK: - Protocol: finishedSwitchDelegate (스위치를 통해 완료 여부 선택)
+protocol FinishedSwitchDelegate: AnyObject {
+    func didfinishedSwitch(_ sender: UISwitch)
 }

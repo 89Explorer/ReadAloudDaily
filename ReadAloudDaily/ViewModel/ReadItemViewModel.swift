@@ -179,7 +179,7 @@ class ReadItemViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    /// 🧮 CoreData 변경 감지, 메서드 
+    /// 🧮 CoreData 변경 감지, 메서드
     private func observeCoreDataChanges() {
         NotificationCenter.default.publisher(for: .NSManagedObjectContextDidSave, object: coredataManager.context)
             .receive(on: DispatchQueue.main)
@@ -189,5 +189,29 @@ class ReadItemViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
+    
+    
+    /// ReadItemViewModel에 저장 메서드 추가 (날짜 별 완료 여부 저장)
+    func markReadingCompleted(for item: ReadItemModel) {
+        let key = "completed_dates_\(item.id.uuidString)"
+        var completed = UserDefaults.standard.dictionary(forKey: key) as? [String: Bool] ?? [:]
+        let today = Date()
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let todayKey = formatter.string(from: today)
+        
+        completed[todayKey] = true
+        UserDefaults.standard.set(completed, forKey: key)
+        
+        print("✅ \(item.title)의 \(todayKey) 독서 완료 저장됨")
+    }
+    
+    
+    
+//    func loadCompletedDates(for item: ReadItemModel) -> [String: Bool] {
+//        let key = "completed_dates_\(item.id.uuidString)"
+//        return UserDefaults.standard.dictionary(forKey: key) as? [String: Bool] ?? [:]
+//    }
 }
 

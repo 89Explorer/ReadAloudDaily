@@ -25,3 +25,13 @@ class ReadItemModel {
         self.isCompleted = isCompleted
     }
 }
+
+
+// MARK - Extension: 날짜별 독서 완료 여부
+extension ReadItemModel {
+    var completedDates: [String: Bool] {
+        let key = "completed_dates_\(self.id.uuidString)"
+        return UserDefaults.standard.dictionary(forKey: key) as? [String: Bool] ?? [:]
+    }
+}
+

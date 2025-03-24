@@ -13,11 +13,14 @@ class TimerViewController: UIViewController {
     
     // MARK: - Variable
     private var readItem: ReadItemModel
+    private var viewModel: ReadItemViewModel = ReadItemViewModel()
+    
     private var timerCounting: Bool = false
     private var remainingSeconds: Int = 0
     private var scheduledTimer: Timer?
     private var baseRemainingSeconds: Int = 0
-
+    
+    
     
     private let startDateKeyPrefix = "timer_start_date_key_"
     private let userDefaults = UserDefaults.standard
@@ -68,6 +71,7 @@ class TimerViewController: UIViewController {
         NotificationPermissionManager.checkAndRequestPermission(from: self)
     }
     
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -96,7 +100,7 @@ class TimerViewController: UIViewController {
         
         updateLabel()
     }
-
+    
     
     private func configure() {
         titleLabel.text = readItem.title
@@ -115,12 +119,12 @@ extension TimerViewController {
             print("⛔️ 타이머 시작 불가: 남은 시간이 0 이하임 (\(remainingSeconds))")
             return
         }
-
+        
         if userDefaults.object(forKey: startDateKey) == nil {
             userDefaults.set(Date(), forKey: startDateKey)
             baseRemainingSeconds = remainingSeconds
         }
-
+        
         scheduledTimer?.invalidate()
         scheduledTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(refreshValue), userInfo: nil, repeats: true)
         setTimeCounting(true)
@@ -129,7 +133,7 @@ extension TimerViewController {
         scheduleLocalNotification(after: remainingSeconds)
         
     }
-
+    
     
     func stopTimer() {
         if let startDate = userDefaults.object(forKey: startDateKey) as? Date {
@@ -138,7 +142,7 @@ extension TimerViewController {
             remainingSeconds = baseRemainingSeconds
             userDefaults.set(remainingSeconds, forKey: remainingTimeKey)
         }
-
+        
         scheduledTimer?.invalidate()
         userDefaults.removeObject(forKey: startDateKey)
         setTimeCounting(false)
@@ -184,18 +188,18 @@ extension TimerViewController {
             print("⚠️ 알림 예약 실패: seconds가 0 이하입니다 (\(seconds))")
             return
         }
-
+        
         let content = UNMutableNotificationContent()
         content.title = "타이머 종료"
         content.body = "\(readItem.title) 읽기 시간이 끝났어요!"
         content.sound = .default
-
+        
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(seconds), repeats: false)
         let request = UNNotificationRequest(identifier: "timer_\(readItem.id)", content: content, trigger: trigger)
-
+        
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
     }
-
+    
     
     
     @objc func refreshValue() {
@@ -203,7 +207,7 @@ extension TimerViewController {
         
         let elapsed = Int(Date().timeIntervalSince(startDate))
         let updatedRemaining = baseRemainingSeconds - elapsed
-
+        
         if updatedRemaining > 0 {
             remainingSeconds = updatedRemaining
             updateLabel()
@@ -212,11 +216,14 @@ extension TimerViewController {
             timeLabel.text = "00:00:00"
             presentTimerFinishedAlert()
             AudioServicesPlaySystemSound(SystemSoundID(1005))
+            
+            // ✅ 읽기 완료 저장
+            viewModel.markReadingCompleted(for: readItem)
         }
     }
     
     
-
+    
     
     @objc func startStopAction() {
         
@@ -225,7 +232,7 @@ extension TimerViewController {
         } else {
             startTimer()
         }
-
+        
     }
     
     @objc func resetAction() {
@@ -300,7 +307,7 @@ extension TimerViewController {
         progressLayer.position = center
         view.layer.addSublayer(progressLayer)
         
-       
+        
         let config = UIImage.SymbolConfiguration(pointSize: 32, weight: .bold)
         startStopButton.setImage(UIImage(systemName: "play.fil", withConfiguration: config), for: .normal)
         startStopButton.tintColor = .white
@@ -310,7 +317,7 @@ extension TimerViewController {
         startStopButton.translatesAutoresizingMaskIntoConstraints = false
         
         
-        resetButton.setImage(UIImage(systemName: "stop.fill", withConfiguration: config),for: .normal)
+        resetButton.setImage(UIImage(systemName: "arrow.trianglehead.counterclockwise", withConfiguration: config),for: .normal)
         resetButton.tintColor = .white
         resetButton.backgroundColor = .white.withAlphaComponent(0.3)
         resetButton.layer.cornerRadius = 45
@@ -362,16 +369,16 @@ extension TimerViewController {
     private func configureBackBarButton() {
         let config = UIImage.SymbolConfiguration(pointSize: 22, weight: .bold)
         let backImage = UIImage(systemName: "chevron.left", withConfiguration: config)
-
+        
         let backButton = UIButton(type: .system)
         backButton.setImage(backImage, for: .normal)
         backButton.tintColor = .white
         backButton.addTarget(self, action: #selector(handleBackButtonTapped), for: .touchUpInside)
-
+        
         let backBarItem = UIBarButtonItem(customView: backButton)
         navigationItem.leftBarButtonItem = backBarItem
     }
-
+    
     @objc private func handleBackButtonTapped() {
         navigationController?.popViewController(animated: true)
     }

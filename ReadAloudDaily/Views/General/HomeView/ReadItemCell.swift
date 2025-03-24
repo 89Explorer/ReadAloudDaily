@@ -13,6 +13,8 @@ class ReadItemCell: UITableViewCell {
     static let reuseIdentifier: String = "ReadItemCell"
     weak var delegate: ReadItemSettingButtonDelegate?
     
+    private var viewModel = ReadItemViewModel()
+    
     // 수정, 삭제 목적으로 선택된 데이터 확인용 변수
     private var currentItem: ReadItemModel?
     
@@ -26,7 +28,7 @@ class ReadItemCell: UITableViewCell {
     private let settingButton: UIButton = UIButton(type: .system)
     private var innerStackView: UIStackView = UIStackView()
     private var totalStackView: UIStackView = UIStackView()
-
+    
     
     // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -81,8 +83,8 @@ class ReadItemCell: UITableViewCell {
         
         startReadButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
         startReadButton.setTitleColor(.label, for: .normal)
-        startReadButton.tintColor = .label
-        startReadButton.backgroundColor = .systemBackground
+        startReadButton.tintColor = .black
+        startReadButton.backgroundColor = .systemGreen
         startReadButton.layer.cornerRadius = 20
         startReadButton.layer.masksToBounds = true
         startReadButton.translatesAutoresizingMaskIntoConstraints = false
@@ -141,21 +143,40 @@ class ReadItemCell: UITableViewCell {
         
         let startReadDate = self.formattedDate(startDate)
         let endReadDate = self.formattedDate(endDate)
-        
         dateLabel.text = "📅 " + startReadDate + " ~ " + endReadDate
         
-        let totalDays = self.daysBetween(startDate, endDate)
-        let progressDays = self.daysBetween(startDate, today) - 2
+        let calendar = Calendar.current
+        let totalDays = daysBetween(startDate, endDate)
         
-        let validProgessDays = min(progressDays, totalDays)
+        var updatedArray: [String] = []
         
-        let completeArray = Array(repeating: "⚪️", count: totalDays)
-        let updatedArray = completeArray.enumerated().map { index, circle in
-            return index < validProgessDays ? "🟢" : circle
+        for offset in 0...totalDays {
+            if let date = calendar.date(byAdding: .day, value: offset, to: startDate) {
+                let dateKey = isoDateString(date)
+                
+                if let wasCompleted = readItem.completedDates[dateKey] {
+                    updatedArray.append(wasCompleted ? "🟢" : "🔴")
+                } else {
+                    if calendar.isDateInToday(date) || date > today {
+                        updatedArray.append("⚪️") // 오늘이거나 미래
+                    } else {
+                        updatedArray.append("🔴") // 과거인데 기록 없음 = 실패
+                    }
+                }
+            }
         }
         
         completeLabel.text = updatedArray.joined(separator: " ")
     }
+    
+    
+    private func isoDateString(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter.string(from: date)
+    }
+
     
 }
 
@@ -187,7 +208,7 @@ extension ReadItemCell {
 
 
 
-// MARK: - Extension: settingButton 메서드 적용 
+// MARK: - Extension: settingButton 메서드 적용
 extension ReadItemCell {
     
     private func didTappedSettingButton() {

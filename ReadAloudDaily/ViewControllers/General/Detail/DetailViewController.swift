@@ -16,6 +16,7 @@ class DetailViewController: UIViewController {
     
     // MARK: - UI Component
     private let detailTableView: UITableView = UITableView(frame: .zero, style: .insetGrouped)
+    private let addMemoButton: UIButton = UIButton(type: .system)
     
     
     // MARK: - Init
@@ -44,6 +45,39 @@ class DetailViewController: UIViewController {
         DispatchQueue.main.async {
             self.detailTableView.reloadData()
         }
+        
+        didTappAddMemoButton()
+    }
+    
+    
+    // MARK: - Function
+    func didTappAddMemoButton() {
+        addMemoButton.addTarget(self, action: #selector(addMemo), for: .touchUpInside)
+    }
+    
+    
+    // MARK: - Action
+    @objc private func addMemo() {
+        print("🌟 AddMemoButton - called")
+        
+        let addMemoVC = AddMemoViewController()
+        
+        if let sheet = addMemoVC.sheetPresentationController {
+//            sheet.detents = [.medium()
+//            ]
+            
+            sheet.detents = [
+                .custom { _ in
+                    450.0
+                }
+            ]
+            
+            sheet.preferredCornerRadius = 25
+            sheet.prefersGrabberVisible = true
+            
+        }
+        
+        present(addMemoVC, animated: true)
     }
 }
 
@@ -63,14 +97,28 @@ extension DetailViewController {
         detailTableView.dataSource = self
         detailTableView.translatesAutoresizingMaskIntoConstraints = false
         
+        addMemoButton.setTitle("메모 작성하기", for: .normal)
+        addMemoButton.titleLabel?.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
+        addMemoButton.setTitleColor(.black, for: .normal)
+        addMemoButton.backgroundColor = .systemOrange
+        addMemoButton.layer.cornerRadius = 15
+        addMemoButton.layer.masksToBounds = true
+        addMemoButton.translatesAutoresizingMaskIntoConstraints = false
+        
         view.addSubview(detailTableView)
+        view.addSubview(addMemoButton)
         
         NSLayoutConstraint.activate([
             
             detailTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             detailTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             detailTableView.topAnchor.constraint(equalTo: view.topAnchor),
-            detailTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            detailTableView.bottomAnchor.constraint(equalTo: addMemoButton.topAnchor, constant: 10),
+            
+            addMemoButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 15),
+            addMemoButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -15),
+            addMemoButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -15),
+            addMemoButton.heightAnchor.constraint(equalToConstant: 50)
             
         ])
     }
@@ -107,19 +155,24 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
         
     }
     
+    
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableView.automaticDimension
     }
     
+    
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return DetailViewSection.allCases[section].title
     }
+    
     
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else { return }
         header.textLabel?.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
         header.textLabel?.textColor = .black
     }
+    
+    
 }
 
 

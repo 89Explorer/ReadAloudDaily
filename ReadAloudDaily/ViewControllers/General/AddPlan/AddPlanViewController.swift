@@ -62,7 +62,7 @@ class AddPlanViewController: UIViewController {
     // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(named: "SheetBackgroundColor")
+        view.backgroundColor = .systemOrange
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGesture)
@@ -154,7 +154,7 @@ extension AddPlanViewController {
         
         NSLayoutConstraint.activate([
             customView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-            customView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            customView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 15),
             customView.widthAnchor.constraint(equalToConstant: 30),
             customView.heightAnchor.constraint(equalToConstant: 30),
             
@@ -247,7 +247,7 @@ extension AddPlanViewController {
         NSLayoutConstraint.activate([
             addItemTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             addItemTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            addItemTableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 70),
+            addItemTableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 65),
             addItemTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -80),
             
             saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),

@@ -37,7 +37,7 @@ class PlanDetailCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        contentView.backgroundColor = .clear
+        contentView.backgroundColor = .white
         self.setupUI()
     }
     
@@ -76,7 +76,7 @@ class PlanDetailCell: UITableViewCell {
             }
         }
         
-        timePickerView.countDownDuration = readItem.dailyReadingTime
+        timePickerView.countDownDuration = (readItem.dailyReadingTime)
         
         finishedSwitch.isOn = readItem.isCompleted
         
@@ -166,6 +166,7 @@ extension PlanDetailCell {
         
         completedCollectionView.register(DateDetailCell.self, forCellWithReuseIdentifier: DateDetailCell.reuseIdentifier)
         completedCollectionView.collectionViewLayout = layout
+        completedCollectionView.backgroundColor = .white
         completedCollectionView.delegate = self
         completedCollectionView.dataSource = self
         
@@ -175,10 +176,12 @@ extension PlanDetailCell {
         timeLabel.textAlignment = .left
         
         timePickerView.datePickerMode = .countDownTimer
-        timePickerView.preferredDatePickerStyle = .wheels
+        timePickerView.preferredDatePickerStyle = .automatic
         timePickerView.locale = Locale(identifier: "ko_KR")
         timePickerView.isEnabled = false
         timePickerView.tintColor = .black
+        timePickerView.overrideUserInterfaceStyle = .light
+
         
         finishedLabel.text = "🎚️ 완료 여부"
         finishedLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)

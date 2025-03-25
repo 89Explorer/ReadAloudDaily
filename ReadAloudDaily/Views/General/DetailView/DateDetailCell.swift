@@ -15,6 +15,7 @@ class DateDetailCell: UICollectionViewCell {
 
        override init(frame: CGRect) {
            super.init(frame: frame)
+           contentView.backgroundColor = .white
            contentView.addSubview(label)
            label.textAlignment = .center
            label.translatesAutoresizingMaskIntoConstraints = false

@@ -90,7 +90,7 @@ extension HomeViewController {
         
         addItemButton.setImage(plusImage, for: .normal)
         addItemButton.tintColor = .label
-        addItemButton.backgroundColor = .systemBackground
+        addItemButton.backgroundColor = .systemOrange
         addItemButton.layer.cornerRadius = 20
         addItemButton.layer.masksToBounds = true
         addItemButton.translatesAutoresizingMaskIntoConstraints = false
@@ -254,6 +254,7 @@ enum ReadItemTableSection: CaseIterable {
         }
     }
 }
+
 
 
 

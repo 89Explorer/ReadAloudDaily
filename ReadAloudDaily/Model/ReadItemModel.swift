@@ -1,5 +1,5 @@
 //
-//  ReadItem.swift
+//  ReadItemModel.swift
 //  ReadAloudDaily
 //
 //  Created by 권정근 on 3/18/25.

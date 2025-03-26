@@ -118,7 +118,7 @@ final class CoreDataManager {
             return nil
         }
     }
-
+    
     
     
     
@@ -146,7 +146,7 @@ final class CoreDataManager {
                 }
                 
                 print("✏️ CoreDataManager: 기존 값 → 제목: \(readItemToUpdate.title ?? "실패"), 시작일: \(readItemToUpdate.startDate ?? Date()), 완료 여부: \(readItemToUpdate.isCompleted)")
-
+                
                 
                 // ✅ 값 업데이트
                 readItemToUpdate.title = readItem.title
@@ -154,12 +154,12 @@ final class CoreDataManager {
                 readItemToUpdate.endDate = readItem.endDate
                 readItemToUpdate.dailyReadingTime = readItem.dailyReadingTime
                 readItemToUpdate.isCompleted = readItem.isCompleted
-
+                
                 try self.context.save()
                 print("✅ CoreDataManager: 수정 완료! - 새 제목: \(readItemToUpdate.title ?? "실패"), 완료 여부: \(readItemToUpdate.isCompleted)")
-
+                
                 promise(.success(readItem)) // ✅ 성공 시 업데이트된 데이터 반환
-
+                
             } catch {
                 print("❌ CoreDataManager: 수정 실패: \(error.localizedDescription)")
                 promise(.failure(error)) // ❌ 실패 시 에러 반환
@@ -245,4 +245,48 @@ final class CoreDataManager {
         .eraseToAnyPublisher()
     }
     
+    
+    // Read
+    func fetchReadMemos(for readItemID: UUID) -> AnyPublisher<[ReadMemoModel], Error> {
+        return Future { [weak self] promise in
+            guard let self = self else {
+                print("❌ CoreDataManager: self가 nil이므로 종료")
+                return
+            }
+            
+            let request: NSFetchRequest<ReadMemo> = ReadMemo.fetchRequest()
+            
+            // id에서 readItemID를 추출하여 필터링 조건을 추가
+            let readItemIDString = readItemID.uuidString
+            
+            
+            // "readItemID_readMemoID" 형식의 ID에서 readItemID 부분만 필터링하여 사용
+            request.predicate = NSPredicate(format: "id BEGINSWITH %@", readItemIDString as CVarArg)
+            request.sortDescriptors = [NSSortDescriptor(key: "createOn", ascending: false)]
+            
+            do {
+                let results = try self.context.fetch(request)
+                print("⭐️ CoreDataManager: Fetch 성공, 총 \(results.count) 개의 데이터")
+                
+                let readMemos = results.compactMap { readMemo -> ReadMemoModel? in
+                    guard let id = readMemo.id,
+                          let memo = readMemo.memo,
+                          let createOn = readMemo.createOn else {
+                        print("❌ Core Data에서 nil 값이 포함된 항목 발견, 해당 항목 제외")
+                        return nil
+                    }
+                    
+                    return ReadMemoModel(
+                        id: id,
+                        memo: memo,
+                        page: Int(readMemo.page))
+                }
+                promise(.success(readMemos))
+            } catch {
+                promise(.failure(error))
+                print("❌ CoreDataManager: ReadMemo 불러오기 실패 - \(error.localizedDescription)")
+            }
+        }
+        .eraseToAnyPublisher()
+    }
 }

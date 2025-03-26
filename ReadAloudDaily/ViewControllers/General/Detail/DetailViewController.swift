@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 class DetailViewController: UIViewController {
     
@@ -13,6 +14,8 @@ class DetailViewController: UIViewController {
     // MARK: - Variable
     private var readItem: ReadItemModel
     var viewModel = ReadItemViewModel()
+    var memoViewModel = AddMemoViewModel()
+    private var cancellables: Set<AnyCancellable> = []
     
     // MARK: - UI Component
     private let detailTableView: UITableView = UITableView(frame: .zero, style: .insetGrouped)
@@ -22,6 +25,8 @@ class DetailViewController: UIViewController {
     // MARK: - Init
     init(readItem: ReadItemModel) {
         self.readItem = readItem
+        
+        memoViewModel.readItemModel = readItem
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -37,16 +42,18 @@ class DetailViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemGreen
         
-        print("✅ 선택된 독서 계획은 : \(readItem.title)")
         self.configureBackBarButton()
         self.configureNavigationTitle()
         setupUI()
         
-        DispatchQueue.main.async {
-            self.detailTableView.reloadData()
-        }
-        
         didTappAddMemoButton()
+        setupBindings()
+        //memoViewModel.fetchReadMemos()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        memoViewModel.fetchReadMemos()
     }
     
     
@@ -54,6 +61,18 @@ class DetailViewController: UIViewController {
     func didTappAddMemoButton() {
         addMemoButton.addTarget(self, action: #selector(addMemo), for: .touchUpInside)
     }
+    
+    private func setupBindings() {
+        memoViewModel.$readMemos
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.detailTableView.reloadData()
+                print("✅✅ DetailViewController: detailTableView 데이터 업데이트")
+            }
+            .store(in: &cancellables)
+    }
+    
+    
     
     
     // MARK: - Action
@@ -213,7 +232,7 @@ extension DetailViewController {
 
 
 
-// MARK: - Extension
+// MARK: - Extension: FinishedSwitchDelegate (완료 버튼 메서드)
 extension DetailViewController: FinishedSwitchDelegate {
     
     func didfinishedSwitch(_ sender: UISwitch) {

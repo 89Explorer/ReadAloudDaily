@@ -29,6 +29,10 @@ class AddMemoViewModel {
     let coredataManager = CoreDataManager.shared
     
     
+    init() {
+        observeCoreDataChanges()
+    }
+    
     
     // MARK: - Function: ReadItemModel 타입의 데이터를 ReadItem (엔티티) 타입으로 변환
     func fetchReadItem() {
@@ -73,6 +77,45 @@ class AddMemoViewModel {
             .store(in: &cancellables)
         
     }
+    
+    
+    // Read
+    func fetchReadMemos() {
+        guard let parent = selectedReadItem else {
+            print("❌ AddMemoViewModel: selectedReadItem이 nil이라 fetch 중단!")
+            return }
+        
+        print("📍 AddMemoViewModel: 독서 메모 불러오기 요청")
+        
+        coredataManager.fetchReadMemos(for: parent.id!)
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    print("✅ AddMemoViewModel: 독서 메모 불러오기 완료")
+                case .failure(let error):
+                    print("❌ AddMemoViewModel: 불러오기 실패 - \(error.localizedDescription)")
+                    self.errorMessage = error.localizedDescription
+                }
+            } receiveValue: { [weak self] readMemos in
+                print("📍 AddMemoViewModel: 받은 독서 메모 갯수: \(readMemos.count) 개")
+                
+                self?.readMemos = readMemos
+            }
+            .store(in: &cancellables)
+    }
+    
+    /// 🧮 CoreData 변경 감지, 메서드
+    private func observeCoreDataChanges() {
+        NotificationCenter.default.publisher(for: .NSManagedObjectContextDidSave, object: coredataManager.context)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                print("🔄 CoreData (메모) 변경 감지 - 데이터 재로딩")
+                self?.fetchReadMemos()
+            }
+            .store(in: &cancellables)
+    }
+    
     
     
     //    func createNewReadMemo(_ memo: ReadMemoModel, parentItem: ReadItem)  {

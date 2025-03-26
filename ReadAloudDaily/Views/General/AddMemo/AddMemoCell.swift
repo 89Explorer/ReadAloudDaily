@@ -70,17 +70,27 @@ extension AddMemoCell: UITextViewDelegate {
             textView.text = ""
             textView.textColor = .white
         }
+        
+       
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
         if textView.text.isEmpty {
             textView.text = "📝 독서 메모를 남겨보세요! (최대 200자)"
             textView.textColor = .systemGray
-            delegate?.didAddMemo("")   // 플레이스홀더일 땐 빈 문자열 전달
-        } else if textView.textColor != .systemGray {
-            delegate?.didAddMemo(textView.text)
         }
     }
+    
+    func textViewDidChange(_ textView: UITextView) {
+        guard let text = textView.text else { return }
+        
+        if text.count > 300 {
+            textView.text = String(text.prefix(300)) // 300자로 자르기
+        }
+        
+        delegate?.didAddMemo(textView.text) // 실시간으로 뷰모델에 전달
+    }
+
 }
 
 

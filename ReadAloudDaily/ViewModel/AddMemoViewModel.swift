@@ -24,6 +24,7 @@ class AddMemoViewModel {
         page: 0)
     @Published var readMemos: [ReadMemoModel] = []
     @Published var errorMessage: String?
+    @Published var isFormValid: Bool = false
     
     private var cancellables: Set<AnyCancellable> = []
     let coredataManager = CoreDataManager.shared
@@ -32,6 +33,17 @@ class AddMemoViewModel {
     init() {
         observeCoreDataChanges()
     }
+    
+    
+    // 유효성 검사 진행 - newReadMemo가 변경될 때 실행
+    private func setupBindings() {
+        $newReadMemo
+            .sink { [weak self] _ in
+                self?.validReadMemoForm()
+            }
+            .store(in: &cancellables)
+    }
+    
     
     
     // MARK: - Function: ReadItemModel 타입의 데이터를 ReadItem (엔티티) 타입으로 변환
@@ -45,6 +57,20 @@ class AddMemoViewModel {
         }
     }
     
+    
+    
+    // MARK: - Function: 유효성 검사
+    func validReadMemoForm() {
+        guard newReadMemo.memo.count < 300 else {
+            
+            isFormValid = false
+            print("❌ 유효성 검사 실패: ")
+            return
+        }
+        
+        isFormValid = true
+        print("✅ 유효성 검사 통과")
+    }
     
     
     

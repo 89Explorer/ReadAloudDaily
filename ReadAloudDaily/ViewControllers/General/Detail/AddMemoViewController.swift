@@ -40,15 +40,15 @@ class AddMemoViewController: UIViewController {
         case .edit:
             self.readMemo = readMemo!
         }
-    
+        
         self.viewModel.newReadMemo = self.readMemo
         super.init(nibName: nil, bundle: nil)
     }
     
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
     
     
     // MARK: - Life Cycle
@@ -62,6 +62,27 @@ class AddMemoViewController: UIViewController {
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGesture)
+        
+        setupBindings()
+
+    }
+    
+    
+    // MARK: - Functions
+    private func setupBindings() {
+        viewModel.$isFormValid
+            .sink { [weak self] isValid in
+                guard let self = self else { return }
+                if !isValid {
+                    saveMemoButton.isEnabled = isValid
+                    showAlert(title: "메모 오류", message: "작성하실 수 있는 메모의 글자 수는 최대 300자입니다. 글자 수를 줄여주세요 😅")
+                    
+                    print("❌ 유효성 검사 진행 결과: 통과 실패")
+                } else {
+                    saveMemoButton.isEnabled = true
+                }
+            }
+            .store(in: &cancellables)
     }
     
     
@@ -69,7 +90,6 @@ class AddMemoViewController: UIViewController {
     @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
-    
 }
 
 
@@ -288,6 +308,7 @@ extension AddMemoViewController {
 extension AddMemoViewController: AddMemoCellDelegate {
     func didAddMemo(_ memo: String) {
         viewModel.newReadMemo.memo = memo
+        viewModel.validReadMemoForm()
         print("✅ memo: \(memo)")
     }
 }
@@ -299,6 +320,20 @@ extension AddMemoViewController: CheckPageCellDelegate {
     func checkPage(_ page: Int) {
         viewModel.newReadMemo.page = page
         print("✅ memo_page: \(page)")
+    }
+}
+
+
+
+// MARK: - Extension: 경고창 메서드
+extension AddMemoViewController {
+    
+    /// 경고창
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+        
+        present(alert, animated: true, completion: nil)
     }
 }
 

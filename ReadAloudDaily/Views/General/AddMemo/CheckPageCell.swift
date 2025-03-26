@@ -12,6 +12,7 @@ class CheckPageCell: UITableViewCell {
     
     // MARK: - Variables
     static let reuseIdentifier: String = "CheckPageCell"
+    weak var delegate: CheckPageCellDelegate?
     
     
     // MARK: - UI Components
@@ -43,6 +44,7 @@ extension CheckPageCell {
         pageTextField.leftView = .init(frame: CGRect(x: 0, y: 0, width: 10, height: 10))
         pageTextField.leftViewMode = .always
         pageTextField.translatesAutoresizingMaskIntoConstraints = false
+        pageTextField.addTarget(self, action: #selector(addPage), for: .editingChanged)
         
         contentView.addSubview(pageTextField)
         
@@ -54,10 +56,17 @@ extension CheckPageCell {
             pageTextField.heightAnchor.constraint(equalToConstant: 44)
         ])
     }
+    
+    @objc private func addPage() {
+        guard let text = pageTextField.text,
+              let page = Int(text) else { return }
+        delegate?.checkPage(page)
+    }
 }
 
 
 
+// MARK: - Extension: UITextFieldDelegate 설정
 extension CheckPageCell: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let currentText = textField.text ?? ""
@@ -69,4 +78,11 @@ extension CheckPageCell: UITextFieldDelegate {
                 
         return numberOnly && updatedText.count <= 3
     }
+}
+
+
+
+// MARK: - Protocol: CheckPageCellDelegate
+protocol CheckPageCellDelegate: AnyObject {
+    func checkPage(_ page: Int)
 }

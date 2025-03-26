@@ -6,13 +6,49 @@
 //
 
 import UIKit
+import Combine
+
 
 class AddMemoViewController: UIViewController {
-
+    
+    
+    // MARK: - Variables
+    private var viewModel: AddMemoViewModel = AddMemoViewModel()
+    private var cancellables: Set<AnyCancellable> = []
+    
+    private var mode: AddMemoMode = .create
+    var readItem: ReadItemModel
+    var readMemo: ReadMemoModel
+    
+    
     
     // MARK: - UI Components
     private let addMemoTableView: UITableView = UITableView(frame: .zero, style: .insetGrouped)
     private let saveMemoButton: UIButton = UIButton(type: .system)
+    
+    
+    
+    // MARK: - Init
+    init(mode: AddMemoMode, readItem: ReadItemModel, readMemo: ReadMemoModel? = nil) {
+        self.mode = mode
+        self.readItem = readItem
+        self.viewModel.readItemModel = readItem
+        
+        switch mode {
+        case .create:
+            self.readMemo = readMemo ?? ReadMemoModel(parentID: readItem.id, memo: "", page: 0)
+        case .edit:
+            self.readMemo = readMemo!
+        }
+    
+        self.viewModel.newReadMemo = self.readMemo
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     
     
     // MARK: - Life Cycle
@@ -33,7 +69,7 @@ class AddMemoViewController: UIViewController {
     @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
-
+    
 }
 
 
@@ -61,6 +97,7 @@ extension AddMemoViewController {
         saveMemoButton.layer.cornerRadius = 15
         saveMemoButton.layer.masksToBounds = true
         saveMemoButton.translatesAutoresizingMaskIntoConstraints = false
+        saveMemoButton.addTarget(self, action: #selector(addMemo), for: .touchUpInside)
         
         view.addSubview(addMemoTableView)
         view.addSubview(saveMemoButton)
@@ -78,6 +115,21 @@ extension AddMemoViewController {
             
         ])
         
+    }
+    
+    @objc private func addMemo() {
+        print("✅ addMemoButton - called ")
+        
+        switch mode {
+        case .create:
+            viewModel.createNewReadMemo(viewModel.newReadMemo)
+            print("🎊 새로운 메모 저장: \(viewModel.newReadMemo)")
+            
+        case .edit:
+            print("😘 수정된 메모 저장: \(viewModel.newReadMemo)")
+        }
+        
+        dismiss(animated: true )
     }
 }
 
@@ -108,10 +160,16 @@ extension AddMemoViewController: UITableViewDelegate, UITableViewDataSource {
             
         case .review:
             guard let cell = tableView.dequeueReusableCell(withIdentifier: AddMemoCell.reuseIdentifier, for: indexPath) as? AddMemoCell else { return UITableViewCell() }
+            
+            cell.delegate = self
+            
             return cell
             
         case .pageCount:
             guard let cell = tableView.dequeueReusableCell(withIdentifier: CheckPageCell.reuseIdentifier, for: indexPath) as? CheckPageCell else { return UITableViewCell() }
+            
+            cell.delegate = self
+            
             return cell
         }
     }
@@ -148,7 +206,7 @@ extension AddMemoViewController: UITableViewDelegate, UITableViewDataSource {
 
 
 
-// MARK: - 뒤로가기 버튼 설정
+// MARK: - Extension: 뒤로가기 버튼 설정
 extension AddMemoViewController {
     
     // MARK: - 뒤로가기 버튼 설정
@@ -198,9 +256,9 @@ extension AddMemoViewController {
 }
 
 
-
+// MARK: - Extension: 네비게이션 타이틀 설정 메서드
 extension AddMemoViewController {
- 
+    
     private func titleLabel(mode: AddMemoMode) {
         let titleLabel: UILabel = UILabel()
         switch mode {
@@ -224,6 +282,25 @@ extension AddMemoViewController {
     }
 }
 
+
+
+// MARK: - Extension: AddMemoCellDelegate (독서 메모 작성 중에 "메모")
+extension AddMemoViewController: AddMemoCellDelegate {
+    func didAddMemo(_ memo: String) {
+        viewModel.newReadMemo.memo = memo
+        print("✅ memo: \(memo)")
+    }
+}
+
+
+
+// MARK: - Extension: CheckPageCellDelegate (독서 메모 작성 중에 "페이지")
+extension AddMemoViewController: CheckPageCellDelegate {
+    func checkPage(_ page: Int) {
+        viewModel.newReadMemo.page = page
+        print("✅ memo_page: \(page)")
+    }
+}
 
 
 

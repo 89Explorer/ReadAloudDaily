@@ -12,6 +12,7 @@ class AddMemoCell: UITableViewCell {
     
     // MARK: Variable
     static let reuseIdentifier: String = "AddMemoCell"
+    weak var delegate: AddMemoCellDelegate?
     
     
     
@@ -75,6 +76,16 @@ extension AddMemoCell: UITextViewDelegate {
         if textView.text.isEmpty {
             textView.text = "📝 독서 메모를 남겨보세요! (최대 200자)"
             textView.textColor = .systemGray
+            delegate?.didAddMemo("")   // 플레이스홀더일 땐 빈 문자열 전달
+        } else if textView.textColor != .systemGray {
+            delegate?.didAddMemo(textView.text)
         }
     }
+}
+
+
+
+// MARK: - Protocol
+protocol AddMemoCellDelegate: AnyObject {
+    func didAddMemo(_ memo: String) 
 }

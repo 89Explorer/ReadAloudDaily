@@ -20,7 +20,7 @@ final class CoreDataManager {
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     
-    // MARK: - Functions: Core Data CRUD
+    // MARK: - Functions: Core Data CRUD - 독서 계획
     // CREATE
     func createReadItem(_ item: ReadItemModel) -> AnyPublisher<ReadItemModel, Error> {
         return Future<ReadItemModel, Error> { [weak self] promise in
@@ -105,6 +105,24 @@ final class CoreDataManager {
     }
     
     
+    // Read: Id를 통해서 해당하는 데이터 불러오기
+    func fetchReadItem(by id: UUID) -> ReadItem? {
+        let request: NSFetchRequest<ReadItem> = ReadItem.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg) // ✅ 특정 ID만 필터링
+        
+        do {
+            let results = try context.fetch(request)
+            return results.first // ✅ 결과가 있으면 첫 번째 항목 반환
+        } catch {
+            print("❌ CoreDataManager: ReadItem(id: \(id)) 찾기 실패 - \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    
+    
+    
+    
     // Update
     func updateReadItem(_ readItem: ReadItemModel) -> AnyPublisher<ReadItemModel, Error> {
         return Future { [weak self] promise in
@@ -184,6 +202,43 @@ final class CoreDataManager {
                 promise(.success(()))
             } catch {
                 print("❌ CoreDataManager: 삭제 실패 - \(error.localizedDescription)")
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    
+    // MARK: - Functions: Core Data CRUD - 독서 메모
+    
+    // Create
+    func createReadMemo(_ memoModel: ReadMemoModel, for parentItem: ReadItem) -> AnyPublisher<ReadMemoModel, Error> {
+        
+        return Future<ReadMemoModel, Error> { [weak self] promise in
+            guard let self = self else {
+                print("❌ CoreDataManager: self가 nil이므로 종료")
+                return
+            }
+            
+            let memo = ReadMemo(context: self.context)
+            memo.id = memoModel.id
+            memo.memo = memoModel.memo
+            memo.page = Int32(memoModel.page)
+            memo.createOn = Date()
+            memo.parent = parentItem   // ✅ 관계설정
+            
+            print("📝 CoreDataManager: 저장할 메모 데이터 확인")
+            print("   - ID: \(memoModel.id)")
+            print("   - Memo: \(memoModel.memo)")
+            print("   - page: \(memoModel.page)")
+            print("   - createOn: \(memo.createOn ?? Date())")
+            
+            do {
+                try self.context.save()
+                print("✅ CoreDataManager: 독서 메모 저장 완료!")
+                promise(.success(memoModel))
+            } catch {
+                print("❌ CoreDataManager: 메모 저장 실패: \(error.localizedDescription)")
                 promise(.failure(error))
             }
         }

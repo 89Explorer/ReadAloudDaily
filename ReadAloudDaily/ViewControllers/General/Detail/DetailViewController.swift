@@ -60,7 +60,7 @@ class DetailViewController: UIViewController {
     @objc private func addMemo() {
         print("🌟 AddMemoButton - called")
         
-        let addMemoVC = AddMemoViewController()
+        let addMemoVC = AddMemoViewController(mode: .create, readItem: readItem, readMemo: nil)
         
         if let sheet = addMemoVC.sheetPresentationController {
 //            sheet.detents = [.medium()

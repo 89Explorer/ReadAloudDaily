@@ -68,7 +68,7 @@ extension AddMemoCell: UITextViewDelegate {
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.textColor == .systemGray {
             textView.text = ""
-            textView.textColor = .black
+            textView.textColor = .white
         }
     }
     

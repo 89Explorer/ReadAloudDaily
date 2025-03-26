@@ -224,7 +224,7 @@ final class CoreDataManager {
             memo.id = memoModel.id
             memo.memo = memoModel.memo
             memo.page = Int32(memoModel.page)
-            memo.createOn = Date()
+            memo.createOn = memoModel.createOn
             memo.parent = parentItem   // ✅ 관계설정
             
             print("📝 CoreDataManager: 저장할 메모 데이터 확인")
@@ -279,7 +279,8 @@ final class CoreDataManager {
                     return ReadMemoModel(
                         id: id,
                         memo: memo,
-                        page: Int(readMemo.page))
+                        page: Int(readMemo.page),
+                        createOn: createOn)
                 }
                 promise(.success(readMemos))
             } catch {

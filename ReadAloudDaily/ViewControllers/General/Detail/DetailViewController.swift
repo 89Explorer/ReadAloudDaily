@@ -70,6 +70,8 @@ class DetailViewController: UIViewController {
                 print("✅✅ DetailViewController: detailTableView 데이터 업데이트")
             }
             .store(in: &cancellables)
+        
+        
     }
     
     
@@ -110,6 +112,7 @@ extension DetailViewController {
         detailTableView.showsVerticalScrollIndicator = false
         detailTableView.backgroundColor = .clear
         detailTableView.separatorStyle = .none
+        detailTableView.register(ReviewDetailCell.self, forCellReuseIdentifier: ReviewDetailCell.reuseIdentifier)
         detailTableView.register(PlanDetailCell.self, forCellReuseIdentifier: PlanDetailCell.reuseIdentifier)
         detailTableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         detailTableView.delegate = self
@@ -153,7 +156,16 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        
+        let section = DetailViewSection.allCases[section]
+        
+        switch section {
+        case .planInfo:
+            return 1
+        case .reviewInfo:
+            return memoViewModel.readMemos.count
+        }
+    
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -169,7 +181,13 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
             return cell
             
         case .reviewInfo:
-            return UITableViewCell()
+            
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: ReviewDetailCell.reuseIdentifier, for: indexPath) as? ReviewDetailCell else { return UITableViewCell()}
+            
+            let selectedMemo = memoViewModel.readMemos[indexPath.row]
+            cell.configure(selectedMemo)
+            
+            return cell
         }
         
     }

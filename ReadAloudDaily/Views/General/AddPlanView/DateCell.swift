@@ -39,6 +39,7 @@ class DateCell: UITableViewCell {
         dateLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
         
         datePicker.datePickerMode = .date
+        datePicker.tintColor = .black
         datePicker.preferredDatePickerStyle = .compact
         datePicker.locale = Locale(identifier: "ko_KR")
         datePicker.timeZone = TimeZone(identifier: "Asia/Seoul")

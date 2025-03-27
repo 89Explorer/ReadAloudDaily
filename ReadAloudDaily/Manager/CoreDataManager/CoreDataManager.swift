@@ -290,4 +290,45 @@ final class CoreDataManager {
         }
         .eraseToAnyPublisher()
     }
+    
+    
+    // update
+    func updateReadMemo(_ readMemo: ReadMemoModel) -> AnyPublisher<ReadMemoModel, Error> {
+        return Future { [weak self] promise in
+            guard let self = self else {
+                print("❌ CoreDataManager: self가 nil이므로 종료")
+                return
+            }
+            
+            print("🚜 CoreDataManager: 독서 메모 업데이트 요청 - ID: \(readMemo.id), 내용: \(readMemo.memo.prefix(10)) ")
+            
+            let request: NSFetchRequest<ReadMemo> = ReadMemo.fetchRequest()
+            request.predicate = NSPredicate(format: "id == %@", readMemo.id as CVarArg)
+            
+            do {
+                let results = try self.context.fetch(request)
+                print("🚜 CoreDataManager: Fetch 성공!!, 총 \(results.count)개의 데이터")
+                
+                guard let readMemoToUpdate = results.first else {
+                    print("❌ CoreDataManager: 해당 ID의 데이터가 존재하지 않습니다.")
+                    throw NSError(domain: "CoreDataError", code: 404, userInfo: [NSLocalizedDescriptionKey: "ReadItem not found."])
+                }
+                
+                print("🚜 CoreDataManager: 기존값 -> 메모: \(readMemoToUpdate.memo ?? "실패"), 페이지: \(readMemoToUpdate.page)")
+                
+                // ✅ 값 업데이트
+                readMemoToUpdate.memo = readMemo.memo
+                readMemoToUpdate.page = Int32(readMemo.page)
+                
+                try self.context.save()
+                print("🚜 CoreDataManager: 수정 완료! -> 새 메모: \(readMemoToUpdate.memo ?? "실패"), 페이지: \(readMemoToUpdate.page)")
+            
+                promise(.success(readMemo))
+            } catch {
+                print("❌ CoreDataManager: 수정 실패: \(error.localizedDescription)")
+                promise(.failure(error))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
 }

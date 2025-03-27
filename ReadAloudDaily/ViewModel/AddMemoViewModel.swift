@@ -131,6 +131,32 @@ class AddMemoViewModel {
             .store(in: &cancellables)
     }
     
+    
+    // Update
+    func updateReadMemo(_ memo: ReadMemoModel) {
+        print("🚜 AddMemoViewModel: 독서 메모 업데이트 요청 -\(memo.memo)")
+        
+        coredataManager.updateReadMemo(memo)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    print("✅ AddMemoViewModel: 수정 완료 - \(memo.memo)")
+                case .failure(let error):
+                    print("❌ AddMemoViewModel: 수정 실패 - \(error.localizedDescription)")
+                    self.errorMessage = error.localizedDescription
+                }
+            } receiveValue: { [weak self] updatedMemo in
+                if let index = self?.readMemos.firstIndex(where: { $0.id == updatedMemo.id }) {
+                    self?.readMemos[index] = updatedMemo
+                } else {
+                    print("⚠️ AddMemoViewModel: 업데이트할 데이터가 배열에서 찾을 수 없습니다.")
+                }
+            }
+            .store(in: &cancellables)
+
+    }
+    
+    
     /// 🧮 CoreData 변경 감지, 메서드
     private func observeCoreDataChanges() {
         NotificationCenter.default.publisher(for: .NSManagedObjectContextDidSave, object: coredataManager.context)
@@ -142,34 +168,4 @@ class AddMemoViewModel {
             .store(in: &cancellables)
     }
     
-    
-    
-    //    func createNewReadMemo(_ memo: ReadMemoModel, parentItem: ReadItem)  {
-    //        print("🧑‍💻 AddMemoViewModel: 새로운 독서 메모 저장 요청")
-    //
-    //        let newMemo = ReadMemoModel(
-    //            parentID: parentItem.id ?? UUID(),
-    //            memo: memo.memo,
-    //            page: memo.page
-    //        )
-    //
-    //        coredataManager.createReadMemo(newMemo, for: parentItem)
-    //            .sink { completion in
-    //                switch completion {
-    //                case .finished:
-    //                    print("🧑‍💻 AddMemoViewModel: 독서 메모 저장 완료되었습니다.!")
-    //                case .failure(let error):
-    //                    print("❌ AddMemoViewModel: 저장 실패 - \(error.localizedDescription)")
-    //                    self.errorMessage = error.localizedDescription
-    //                }
-    //            } receiveValue: { [weak self] newReadMemo in
-    //                print("🧑‍💻 AddMemoViewModel: 저장된 독서 메모 확인")
-    //                print("   - ID: \(newReadMemo.id)")
-    //                print("   - Memo: \(newReadMemo.memo)")
-    //                print("   - Page: \(newReadMemo.page)")
-    //                self?.newReadMemo = newReadMemo
-    //                self?.readMemos.append(newReadMemo)
-    //            }
-    //            .store(in: &cancellables)
-    //    }
 }

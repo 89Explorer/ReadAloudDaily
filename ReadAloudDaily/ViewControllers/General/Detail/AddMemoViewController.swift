@@ -16,7 +16,7 @@ class AddMemoViewController: UIViewController {
     private var viewModel: AddMemoViewModel = AddMemoViewModel()
     private var cancellables: Set<AnyCancellable> = []
     
-    private var mode: AddMemoMode = .create
+    private var mode: AddMemoMode
     var readItem: ReadItemModel
     var readMemo: ReadMemoModel
     
@@ -56,9 +56,9 @@ class AddMemoViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .systemOrange
-        setupUI()
+        setupUI(mode: mode)
         setupBackButton()
-        titleLabel(mode: .create)
+        titleLabel(mode: mode)
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGesture)
@@ -75,11 +75,13 @@ class AddMemoViewController: UIViewController {
                 guard let self = self else { return }
                 if !isValid {
                     saveMemoButton.isEnabled = isValid
+                    saveMemoButton.backgroundColor = .systemRed
                     showAlert(title: "메모 오류", message: "작성하실 수 있는 메모의 글자 수는 최대 300자입니다. 글자 수를 줄여주세요 😅")
-                    
+                   
                     print("❌ 유효성 검사 진행 결과: 통과 실패")
                 } else {
                     saveMemoButton.isEnabled = true
+                    saveMemoButton.backgroundColor = .systemGreen
                 }
             }
             .store(in: &cancellables)
@@ -98,7 +100,15 @@ class AddMemoViewController: UIViewController {
 extension AddMemoViewController {
     
     // MARK: - Function: UI 설정
-    private func setupUI() {
+    private func setupUI(mode: AddMemoMode) {
+        
+        switch mode {
+        case .create:
+            saveMemoButton.setTitle("독서 메모 생성", for: .normal)
+        case .edit:
+            saveMemoButton.setTitle("독서 메모 수정", for: .normal)
+        }
+        
         addMemoTableView.separatorStyle = .none
         addMemoTableView.backgroundColor = .clear
         addMemoTableView.translatesAutoresizingMaskIntoConstraints = false
@@ -147,6 +157,7 @@ extension AddMemoViewController {
             
         case .edit:
             print("😘 수정된 메모 저장: \(viewModel.newReadMemo)")
+            viewModel.updateReadMemo(viewModel.newReadMemo)
         }
         
         dismiss(animated: true )
@@ -182,6 +193,13 @@ extension AddMemoViewController: UITableViewDelegate, UITableViewDataSource {
             guard let cell = tableView.dequeueReusableCell(withIdentifier: AddMemoCell.reuseIdentifier, for: indexPath) as? AddMemoCell else { return UITableViewCell() }
             
             cell.delegate = self
+            switch mode {
+            case .create:
+                break
+            case .edit:
+                cell.configure(readMemo)
+            }
+            //cell.configure(readMemo)
             
             return cell
             
@@ -190,6 +208,12 @@ extension AddMemoViewController: UITableViewDelegate, UITableViewDataSource {
             
             cell.delegate = self
             
+            switch mode {
+            case .create:
+                break
+            case .edit:
+                cell.configure(readMemo)
+            }
             return cell
         }
     }

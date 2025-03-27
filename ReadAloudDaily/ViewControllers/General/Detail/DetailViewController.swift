@@ -84,14 +84,14 @@ class DetailViewController: UIViewController {
         let addMemoVC = AddMemoViewController(mode: .create, readItem: readItem, readMemo: nil)
         
         if let sheet = addMemoVC.sheetPresentationController {
-//            sheet.detents = [.medium()
-//            ]
-            
-            sheet.detents = [
-                .custom { _ in
-                    450.0
-                }
+            sheet.detents = [.large()
             ]
+            
+//            sheet.detents = [
+//                .custom { _ in
+//                    550.0
+//                }
+//            ]
             
             sheet.preferredCornerRadius = 25
             sheet.prefersGrabberVisible = true
@@ -186,6 +186,7 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
             
             let selectedMemo = memoViewModel.readMemos[indexPath.row]
             cell.configure(selectedMemo)
+            cell.delegate = self
             
             return cell
         }
@@ -211,7 +212,6 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
     
     
 }
-
 
 
 
@@ -247,6 +247,42 @@ extension DetailViewController {
     }
     
 }
+
+
+// MARK: - Protocol: ReviewDetailCellDelegate 설정 (settingButton 수정 / 삭제)
+extension DetailViewController: ReviewDetailCellDelegate {
+    func didTappedSettingButton(for memo: ReadMemoModel, from sender: UIButton) {
+        print("⚙️ 설정 버튼 누름 - ID: \(memo.id)")
+        
+        let alert = UIAlertController(title: "수정 또는 삭제를 하시겠습니까?", message: nil, preferredStyle: .actionSheet)
+        
+        let edit = UIAlertAction(title: "수정", style: .default) { _ in
+            let editVC = AddMemoViewController(mode: .edit, readItem: self.readItem, readMemo: memo)
+            
+            if let sheet = editVC.sheetPresentationController {
+                sheet.detents = [
+                    .large()
+                ]
+                sheet.preferredCornerRadius = 25
+                sheet.prefersGrabberVisible = true
+            }
+            self.present(editVC, animated: true)
+        }
+        
+        let delete = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+            print("🗑️ 삭제를 진행합니다. 삭제되는 메모 ID: \(memo.id)")
+        }
+        
+        let cancel = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        
+        alert.addAction(edit)
+        alert.addAction(delete)
+        alert.addAction(cancel)
+        
+        present(alert, animated: true)
+    }
+}
+
 
 
 

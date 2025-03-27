@@ -12,6 +12,8 @@ class ReviewDetailCell: UITableViewCell {
     
     // MARK: - Variables
     static let reuseIdentifier: String = "ReviewDetailCell"
+    weak var delegate: ReviewDetailCellDelegate?
+    private var currentMemo: ReadMemoModel?
 
     
     // MARK: - UI Component
@@ -32,6 +34,7 @@ class ReviewDetailCell: UITableViewCell {
         backgroundColor = .white
         contentView.backgroundColor = .white
         self.setupUI()
+        tappedSettingButton()
     }
     
     required init?(coder: NSCoder) {
@@ -41,6 +44,7 @@ class ReviewDetailCell: UITableViewCell {
     
     // MARK: - Functions
     func configure(_ readMemo: ReadMemoModel) {
+        self.currentMemo = readMemo
         let createDate = readMemo.createOn
         let formatter = DateFormatter()
         formatter.dateFormat = "M월 d일"
@@ -50,8 +54,22 @@ class ReviewDetailCell: UITableViewCell {
         memoTextView.text = readMemo.memo
         pageLabel.text = "여기까지 읽은 📃 페이지: \(readMemo.page)p "
     }
-
+    
+    
+    private func tappedSettingButton() {
+        settingButton.addTarget(self, action: #selector(didCalledSetting), for: .touchUpInside)
+    }
+    
+    
+    // MARK: - Actions
+    @objc private func didCalledSetting() {
+        print("didCalledSetting - called")
+        guard let memo = currentMemo else { return }
+        delegate?.didTappedSettingButton(for: memo, from: settingButton)
+    }
 }
+
+
 
 
 // MARK: - Extension: UI 설정
@@ -80,6 +98,7 @@ extension ReviewDetailCell {
         memoTextView.backgroundColor = .white
         memoTextView.isEditable = false
         memoTextView.textContainer.maximumNumberOfLines = 2
+        memoTextView.isScrollEnabled = false 
         memoTextView.textContainer.lineBreakMode = .byTruncatingTail
         
         pageLabel.text = "여기까지 읽은 페이지: 120p"
@@ -117,4 +136,11 @@ extension ReviewDetailCell {
             seperator.heightAnchor.constraint(equalToConstant: 2)
         ])
     }
+}
+
+
+
+// MARK: - Protocol: settingButton을 눌렀을 때 동작할 델리게이트 패턴
+protocol ReviewDetailCellDelegate: AnyObject {
+    func didTappedSettingButton(for memo: ReadMemoModel, from sender: UIButton)
 }

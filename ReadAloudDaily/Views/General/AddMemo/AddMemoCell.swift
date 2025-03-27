@@ -34,6 +34,11 @@ class AddMemoCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
+    
+    // 메모를 수정할 때 수정할 기존의 데이터를 받아오기 위한 configure 메서드 구현! 할 것
+    func configure(_ readMemo: ReadMemoModel) {
+        memoTextView.text = readMemo.memo
+    }
 }
 
 
@@ -45,7 +50,7 @@ extension AddMemoCell {
         memoTextView.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
         memoTextView.textColor = .systemGray
         memoTextView.textContainerInset = .init(top: 10, left: 10, bottom: 10, right: 10)
-        memoTextView.text = "📝 독서 메모를 남겨보세요! (최대 300자)"
+        memoTextView.text = "독서 메모를 남겨보세요! (최대 300자)"
         memoTextView.translatesAutoresizingMaskIntoConstraints = false
         
         contentView.addSubview(memoTextView)
@@ -55,7 +60,7 @@ extension AddMemoCell {
             memoTextView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             memoTextView.topAnchor.constraint(equalTo: contentView.topAnchor),
             memoTextView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            memoTextView.heightAnchor.constraint(equalToConstant: 180)
+            memoTextView.heightAnchor.constraint(equalToConstant: 280)
         ])
     }
 }
@@ -68,10 +73,8 @@ extension AddMemoCell: UITextViewDelegate {
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.textColor == .systemGray {
             textView.text = ""
-            textView.textColor = .white
+            textView.textColor = .black
         }
-        
-       
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
@@ -79,6 +82,7 @@ extension AddMemoCell: UITextViewDelegate {
             textView.text = "📝 독서 메모를 남겨보세요! (최대 200자)"
             textView.textColor = .systemGray
         }
+
     }
     
     func textViewDidChange(_ textView: UITextView) {

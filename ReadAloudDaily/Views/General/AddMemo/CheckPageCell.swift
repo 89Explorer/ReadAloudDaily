@@ -49,6 +49,9 @@ extension CheckPageCell {
         pageTextField.attributedPlaceholder = NSAttributedString(string: "현재까지 읽으신 페이지를 입력해주세요 :)", attributes: [.foregroundColor: UIColor.systemGray])
         pageTextField.leftView = .init(frame: CGRect(x: 0, y: 0, width: 10, height: 10))
         pageTextField.leftViewMode = .always
+        pageTextField.backgroundColor = .secondarySystemBackground
+        pageTextField.layer.cornerRadius = 5
+        pageTextField.layer.masksToBounds = true
         pageTextField.translatesAutoresizingMaskIntoConstraints = false
         pageTextField.addTarget(self, action: #selector(addPage), for: .editingChanged)
         

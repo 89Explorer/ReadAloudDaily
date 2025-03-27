@@ -49,7 +49,7 @@ class TimeCell: UITableViewCell {
         datePicker.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
         datePicker.datePickerMode = .countDownTimer
         datePicker.preferredDatePickerStyle = .wheels
-        datePicker.tintColor = .black
+        datePicker.tintColor = .label
         datePicker.locale = Locale(identifier: "ko_KR")
         datePicker.addTarget(self, action: #selector(selectedTime(_ :)), for: .valueChanged)
         

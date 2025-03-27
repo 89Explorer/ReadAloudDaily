@@ -62,7 +62,7 @@ class AddPlanViewController: UIViewController {
     // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemOrange
+        view.backgroundColor = .systemBackground
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGesture)
@@ -191,7 +191,7 @@ extension AddPlanViewController {
             titleLabel.text = "독서 계획을 수정해주세요 :)"
         }
         //titleLabel.text = "독서 계획을 세워주세요:)"
-        titleLabel.textColor = .black
+        titleLabel.textColor = .label
         titleLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 26)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -221,8 +221,8 @@ extension AddPlanViewController {
         
         //saveButton.setTitle("일정 생성", for: .normal)
         saveButton.titleLabel?.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 24)
-        saveButton.tintColor = .black
-        saveButton.backgroundColor = .systemGray
+        saveButton.tintColor = .label
+        saveButton.backgroundColor = .systemIndigo
         saveButton.layer.cornerRadius = 15
         saveButton.layer.masksToBounds = true
         saveButton.translatesAutoresizingMaskIntoConstraints = false
@@ -344,7 +344,7 @@ extension AddPlanViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else { return }
         header.textLabel?.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        header.textLabel?.textColor = .black
+        header.textLabel?.textColor = .label
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {

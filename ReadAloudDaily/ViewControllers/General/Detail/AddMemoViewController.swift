@@ -55,7 +55,7 @@ class AddMemoViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .systemOrange
+        view.backgroundColor = .systemBackground
         setupUI(mode: mode)
         setupBackButton()
         titleLabel(mode: mode)
@@ -75,7 +75,7 @@ class AddMemoViewController: UIViewController {
                 guard let self = self else { return }
                 if !isValid {
                     saveMemoButton.isEnabled = isValid
-                    saveMemoButton.backgroundColor = .systemRed
+                    saveMemoButton.backgroundColor = .systemGray
                     showAlert(title: "메모 오류", message: "작성하실 수 있는 메모의 글자 수는 최대 300자입니다. 글자 수를 줄여주세요 😅")
                    
                     print("❌ 유효성 검사 진행 결과: 통과 실패")
@@ -122,8 +122,8 @@ extension AddMemoViewController {
         
         saveMemoButton.setTitle("독서 메모 저장", for: .normal)
         saveMemoButton.titleLabel?.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 24)
-        saveMemoButton.setTitleColor(.black, for: .normal)
-        saveMemoButton.backgroundColor = .systemGreen
+        saveMemoButton.setTitleColor(.label, for: .normal)
+        saveMemoButton.backgroundColor = .systemIndigo
         saveMemoButton.layer.cornerRadius = 15
         saveMemoButton.layer.masksToBounds = true
         saveMemoButton.translatesAutoresizingMaskIntoConstraints = false
@@ -225,7 +225,7 @@ extension AddMemoViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else { return }
         header.textLabel?.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        header.textLabel?.textColor = .black
+        header.textLabel?.textColor = .label
     }
     
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -312,7 +312,7 @@ extension AddMemoViewController {
             titleLabel.text = "독서 메모을 수정해주세요 :)"
         }
         //titleLabel.text = "독서 계획을 세워주세요:)"
-        titleLabel.textColor = .black
+        titleLabel.textColor = .label
         titleLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 26)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         

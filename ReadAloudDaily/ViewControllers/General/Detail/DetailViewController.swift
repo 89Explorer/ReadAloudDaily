@@ -40,7 +40,7 @@ class DetailViewController: UIViewController {
     // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemGreen
+        view.backgroundColor = .secondarySystemBackground
         
         self.configureBackBarButton()
         self.configureNavigationTitle()
@@ -121,8 +121,8 @@ extension DetailViewController {
         
         addMemoButton.setTitle("메모 작성하기", for: .normal)
         addMemoButton.titleLabel?.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        addMemoButton.setTitleColor(.black, for: .normal)
-        addMemoButton.backgroundColor = .systemOrange
+        addMemoButton.setTitleColor(.label, for: .normal)
+        addMemoButton.backgroundColor = .systemIndigo
         addMemoButton.layer.cornerRadius = 15
         addMemoButton.layer.masksToBounds = true
         addMemoButton.translatesAutoresizingMaskIntoConstraints = false
@@ -207,7 +207,7 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else { return }
         header.textLabel?.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        header.textLabel?.textColor = .black
+        header.textLabel?.textColor = .label
     }
     
     
@@ -225,7 +225,8 @@ extension DetailViewController {
         
         let backButton = UIButton(type: .system)
         backButton.setImage(backImage, for: .normal)
-        backButton.tintColor = .black
+        backButton.tintColor = .label
+        //backButton.backgroundColor = .systemIndigo
         backButton.addTarget(self, action: #selector(handleBackButtonTapped), for: .touchUpInside)
         
         let backBarItem = UIBarButtonItem(customView: backButton)
@@ -240,7 +241,7 @@ extension DetailViewController {
     private func configureNavigationTitle() {
         let customView = UILabel(frame: .zero)
         customView.text = "상세 페이지"
-        customView.textColor = .black
+        customView.textColor = .label
         customView.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 30)
         
         navigationItem.titleView = customView

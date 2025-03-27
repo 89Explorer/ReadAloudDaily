@@ -37,7 +37,8 @@ class PlanDetailCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        contentView.backgroundColor = .white
+        //contentView.backgroundColor = .white.withAlphaComponent(0.5)
+        contentView.backgroundColor = .systemBackground
         self.setupUI()
     }
     
@@ -136,26 +137,26 @@ extension PlanDetailCell {
     private func setupUI() {
         titleLabel.text = "📖 책 제목"
         titleLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        titleLabel.textColor = .black
+        titleLabel.textColor = .label
         titleLabel.textAlignment = .left
         
         titleValueLabel.text = "과학을 보다"
         titleValueLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 16)
-        titleValueLabel.textColor = .black
+        titleValueLabel.textColor = .label
         titleValueLabel.textAlignment = .left
         
         dateLabel.text = "📅 독서 기간"
         dateLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        dateLabel.textColor = .black
+        dateLabel.textColor = .label
         dateLabel.textAlignment = .left
         
         dateValueLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 16)
-        dateValueLabel.textColor = .black
+        dateValueLabel.textColor = .label
         dateValueLabel.textAlignment = .left
         
         completedLabel.text = "✅ 기간 내 독서 여부"
         completedLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        completedLabel.textColor = .black
+        completedLabel.textColor = .label
         completedLabel.textAlignment = .left
         
         let layout = UICollectionViewFlowLayout()
@@ -166,26 +167,29 @@ extension PlanDetailCell {
         
         completedCollectionView.register(DateDetailCell.self, forCellWithReuseIdentifier: DateDetailCell.reuseIdentifier)
         completedCollectionView.collectionViewLayout = layout
-        completedCollectionView.backgroundColor = .white
+        completedCollectionView.backgroundColor = .clear
         completedCollectionView.delegate = self
         completedCollectionView.dataSource = self
         
         timeLabel.text = "⏰ 독서 시간"
         timeLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        timeLabel.textColor = .black
+        timeLabel.textColor = .label
         timeLabel.textAlignment = .left
         
         timePickerView.datePickerMode = .countDownTimer
         timePickerView.preferredDatePickerStyle = .automatic
         timePickerView.locale = Locale(identifier: "ko_KR")
         timePickerView.isEnabled = false
-        timePickerView.tintColor = .black
+        timePickerView.tintColor = .label
+        timePickerView.backgroundColor = .secondarySystemBackground
+        timePickerView.layer.cornerRadius = 5
+        timePickerView.layer.masksToBounds = true
         timePickerView.overrideUserInterfaceStyle = .light
 
         
         finishedLabel.text = "🎚️ 완료 여부"
         finishedLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        finishedLabel.textColor = .black
+        finishedLabel.textColor = .label
         finishedLabel.textAlignment = .left
         
         finishedSwitch.isOn = false

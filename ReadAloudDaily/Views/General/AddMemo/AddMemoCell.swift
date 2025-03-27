@@ -51,6 +51,9 @@ extension AddMemoCell {
         memoTextView.textColor = .systemGray
         memoTextView.textContainerInset = .init(top: 10, left: 10, bottom: 10, right: 10)
         memoTextView.text = "독서 메모를 남겨보세요! (최대 300자)"
+        memoTextView.layer.cornerRadius = 5
+        memoTextView.layer.masksToBounds = true 
+        memoTextView.backgroundColor = .secondarySystemBackground
         memoTextView.translatesAutoresizingMaskIntoConstraints = false
         
         contentView.addSubview(memoTextView)
@@ -73,7 +76,7 @@ extension AddMemoCell: UITextViewDelegate {
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.textColor == .systemGray {
             textView.text = ""
-            textView.textColor = .black
+            textView.textColor = .label
         }
     }
     

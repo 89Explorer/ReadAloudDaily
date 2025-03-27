@@ -26,7 +26,7 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .systemGreen
+        view.backgroundColor = .secondarySystemBackground
         didTappedAddItemButton()
         setupUI()
         
@@ -90,7 +90,7 @@ extension HomeViewController {
         
         addItemButton.setImage(plusImage, for: .normal)
         addItemButton.tintColor = .label
-        addItemButton.backgroundColor = .systemOrange
+        addItemButton.backgroundColor = .systemIndigo
         addItemButton.layer.cornerRadius = 20
         addItemButton.layer.masksToBounds = true
         addItemButton.translatesAutoresizingMaskIntoConstraints = false
@@ -214,7 +214,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else { return }
         header.textLabel?.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        header.textLabel?.textColor = .black
+        header.textLabel?.textColor = .label
     }
 }
 
@@ -231,7 +231,7 @@ extension HomeViewController {
         let titleLabel: UILabel = UILabel()
         titleLabel.text = dateString
         titleLabel.font = UIFont.boldSystemFont(ofSize: 28)
-        titleLabel.textColor = .black
+        titleLabel.textColor = .label
         
         let leftBarButton = UIBarButtonItem(customView: titleLabel)
         navigationItem.leftBarButtonItem = leftBarButton

@@ -35,8 +35,8 @@ class ReadItemCell: UITableViewCell {
         
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        backgroundColor = .clear
-        contentView.backgroundColor = .white.withAlphaComponent(0.5)
+        //backgroundColor = .secondarySystemGroupedBackground
+        contentView.backgroundColor = .systemBackground
         contentView.layer.cornerRadius = 10
         contentView.layer.masksToBounds = true
         
@@ -63,18 +63,18 @@ class ReadItemCell: UITableViewCell {
     private func setupUI() {
         //titleLabel.text = "해리포터 돌의 시리즈 해리포터 돌의 시리즈"
         titleLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        titleLabel.textColor = .black
+        titleLabel.textColor = .label
         titleLabel.numberOfLines = 0
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
         //dateLabel.text = "📅: 3월 12일 ~ 3월 20일"
         dateLabel.font =  UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 16)
-        dateLabel.textColor = .black
+        dateLabel.textColor = .label
         dateLabel.numberOfLines = 1
         
         //timeLabel.text = "⏰: 30분"
         timeLabel.font =  UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 16)
-        timeLabel.textColor = .black
+        timeLabel.textColor = .label
         timeLabel.numberOfLines = 1
         
         //completeLabel.text = "⚪️ ⚪️ ⚪️ ⚪️ ⚪️"
@@ -83,14 +83,14 @@ class ReadItemCell: UITableViewCell {
         
         startReadButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
         startReadButton.setTitleColor(.label, for: .normal)
-        startReadButton.tintColor = .black
-        startReadButton.backgroundColor = .systemGreen
+        startReadButton.tintColor = .label
+        startReadButton.backgroundColor = .systemIndigo
         startReadButton.layer.cornerRadius = 20
         startReadButton.layer.masksToBounds = true
         startReadButton.translatesAutoresizingMaskIntoConstraints = false
         
         settingButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-        settingButton.tintColor = .black
+        settingButton.tintColor = .label
         settingButton.translatesAutoresizingMaskIntoConstraints = false
         
         innerStackView.axis = .horizontal

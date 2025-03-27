@@ -31,8 +31,8 @@ class ReviewDetailCell: UITableViewCell {
     // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        backgroundColor = .white
-        contentView.backgroundColor = .white
+        backgroundColor = .systemBackground
+        //contentView.backgroundColor = .systemBackground
         self.setupUI()
         tappedSettingButton()
     }
@@ -78,13 +78,13 @@ extension ReviewDetailCell {
     private func setupUI() {
         dateLabel.text = "3월 12일"
         dateLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 14)
-        dateLabel.textColor = .black
+        dateLabel.textColor = .label
         dateLabel.numberOfLines = 1
         dateLabel.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         dateLabel.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
         
         settingButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-        settingButton.tintColor = .black
+        settingButton.tintColor = .label
         
         innerStackView.addArrangedSubview(dateLabel)
         innerStackView.addArrangedSubview(settingButton)
@@ -94,8 +94,10 @@ extension ReviewDetailCell {
         memoTextView.text = "평점 5.0, 5점 최고에요! 😀"
         memoTextView.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 14)
         memoTextView.contentInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
-        memoTextView.textColor = .black
-        memoTextView.backgroundColor = .white
+        memoTextView.textColor = .label
+        memoTextView.backgroundColor = .secondarySystemBackground
+        memoTextView.layer.cornerRadius = 5
+        memoTextView.layer.masksToBounds = true 
         memoTextView.isEditable = false
         memoTextView.textContainer.maximumNumberOfLines = 2
         memoTextView.isScrollEnabled = false 
@@ -103,9 +105,9 @@ extension ReviewDetailCell {
         
         pageLabel.text = "여기까지 읽은 페이지: 120p"
         pageLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 14)
-        pageLabel.textColor = .black
+        pageLabel.textColor = .label
         
-        seperator.backgroundColor = .black
+        seperator.backgroundColor = .label
         
         totalStackView.addArrangedSubview(innerStackView)
         totalStackView.addArrangedSubview(memoTextView)

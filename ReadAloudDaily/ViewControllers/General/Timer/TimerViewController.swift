@@ -56,7 +56,7 @@ class TimerViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         configure()
-        view.backgroundColor = .systemGreen
+        view.backgroundColor = .secondarySystemBackground
         
         restoreTimerState()
         
@@ -170,7 +170,7 @@ extension TimerViewController {
         let config = UIImage.SymbolConfiguration(pointSize: 32, weight: .bold)
         let symbolName = timerCounting ? "pause.fill" : "play.fill"
         startStopButton.setImage(UIImage(systemName: symbolName, withConfiguration: config), for: .normal)
-        startStopButton.tintColor = .white
+        startStopButton.tintColor = .label
     }
     
     // 알람이 완료되면 경고창 띄우기
@@ -258,23 +258,23 @@ extension TimerViewController {
     private func setupUI() {
         
         titleLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 50)
-        titleLabel.textColor = .white
+        titleLabel.textColor = .label
         titleLabel.numberOfLines = 0
         titleLabel.textAlignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
         modeLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 20)
-        modeLabel.textColor = .white
+        modeLabel.textColor = .label
         modeLabel.textAlignment = .center
         modeLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        iconImageView.tintColor = .white
+        iconImageView.tintColor = .label
         iconImageView.contentMode = .scaleAspectFit
         iconImageView.isUserInteractionEnabled = false
         iconImageView.translatesAutoresizingMaskIntoConstraints = false
         
         timeLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 70)
-        timeLabel.textColor = .white
+        timeLabel.textColor = .label
         timeLabel.textAlignment = .center
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -297,7 +297,7 @@ extension TimerViewController {
         view.layer.addSublayer(trackLayer)
         
         progressLayer.path = circularPath.cgPath
-        progressLayer.strokeColor = UIColor.white.cgColor
+        progressLayer.strokeColor = UIColor.systemIndigo.cgColor
         progressLayer.lineWidth = 20
         progressLayer.fillColor = UIColor.clear.cgColor
         progressLayer.lineCap = .round
@@ -308,16 +308,16 @@ extension TimerViewController {
         
         let config = UIImage.SymbolConfiguration(pointSize: 32, weight: .bold)
         startStopButton.setImage(UIImage(systemName: "play.fil", withConfiguration: config), for: .normal)
-        startStopButton.tintColor = .white
-        startStopButton.backgroundColor = .white.withAlphaComponent(0.3)
+        startStopButton.tintColor = .label
+        startStopButton.backgroundColor = .systemBackground.withAlphaComponent(0.3)
         startStopButton.layer.cornerRadius = 45
         startStopButton.clipsToBounds = true
         startStopButton.translatesAutoresizingMaskIntoConstraints = false
         
         
         resetButton.setImage(UIImage(systemName: "arrow.trianglehead.counterclockwise", withConfiguration: config),for: .normal)
-        resetButton.tintColor = .white
-        resetButton.backgroundColor = .white.withAlphaComponent(0.3)
+        resetButton.tintColor = .label
+        resetButton.backgroundColor = .systemBackground.withAlphaComponent(0.3)
         resetButton.layer.cornerRadius = 45
         resetButton.clipsToBounds = true
         resetButton.translatesAutoresizingMaskIntoConstraints = false
@@ -370,7 +370,7 @@ extension TimerViewController {
         
         let backButton = UIButton(type: .system)
         backButton.setImage(backImage, for: .normal)
-        backButton.tintColor = .white
+        backButton.tintColor = .label
         backButton.addTarget(self, action: #selector(handleBackButtonTapped), for: .touchUpInside)
         
         let backBarItem = UIBarButtonItem(customView: backButton)

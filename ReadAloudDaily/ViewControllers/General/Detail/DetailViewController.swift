@@ -271,6 +271,7 @@ extension DetailViewController: ReviewDetailCellDelegate {
         
         let delete = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
             print("🗑️ 삭제를 진행합니다. 삭제되는 메모 ID: \(memo.id)")
+            self?.memoViewModel.deleteReadMemo(with: memo.id)
         }
         
         let cancel = UIAlertAction(title: "취소", style: .cancel, handler: nil)

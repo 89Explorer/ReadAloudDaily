@@ -157,6 +157,27 @@ class AddMemoViewModel {
     }
     
     
+    // Delete
+    func deleteReadMemo(with id: String) {
+        print("🚜 AddMemoViewModel: 독서 메모 삭제 요청 - ID: \(id)")
+        
+        coredataManager.deleteReadMemo(with: id)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    print("✅ AddMemoViewModel: 삭제 완료 - ID: \(id)")
+                case .failure(let error):
+                    print("❌ AddMemoViewModel: 삭제 실패 - \(error.localizedDescription)")
+                    self.errorMessage = error.localizedDescription
+                }
+            } receiveValue: { [weak self] in
+                print("🚜 AddMemoViewModel: readMemos 배열에서 삭제 - ID: \(id)")
+                self?.readMemos.removeAll { $0.id == id }
+            }
+            .store(in: &cancellables)
+    }
+    
+    
     /// 🧮 CoreData 변경 감지, 메서드
     private func observeCoreDataChanges() {
         NotificationCenter.default.publisher(for: .NSManagedObjectContextDidSave, object: coredataManager.context)

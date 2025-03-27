@@ -7,13 +7,13 @@
         <attribute name="isCompleted" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="startDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="title" optional="YES" attributeType="String"/>
-        <relationship name="memos" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ReadMemo" inverseName="parent" inverseEntity="ReadMemo"/>
+        <relationship name="memos" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ReadMemo" inverseName="parent" inverseEntity="ReadMemo"/>
     </entity>
     <entity name="ReadMemo" representedClassName="ReadMemo" syncable="YES">
         <attribute name="createOn" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" optional="YES" attributeType="String"/>
         <attribute name="memo" optional="YES" attributeType="String"/>
         <attribute name="page" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
-        <relationship name="parent" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="ReadItem" inverseName="memos" inverseEntity="ReadItem"/>
+        <relationship name="parent" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ReadItem" inverseName="memos" inverseEntity="ReadItem"/>
     </entity>
 </model>

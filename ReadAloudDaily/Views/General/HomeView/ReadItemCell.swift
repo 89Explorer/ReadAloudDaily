@@ -110,6 +110,7 @@ class ReadItemCell: UITableViewCell {
         //totalStackView.addArrangedSubview(startReadButton)
         totalStackView.translatesAutoresizingMaskIntoConstraints = false
         
+        
         contentView.addSubview(totalStackView)
         contentView.addSubview(startReadButton)
         NSLayoutConstraint.activate([

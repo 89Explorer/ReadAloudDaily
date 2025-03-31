@@ -248,9 +248,9 @@ enum ReadItemTableSection: CaseIterable {
     var title: String {
         switch self {
         case .progress:
-            return "📖 진행 중인 도서 계획"
+            return "📖 진행 중인 독서 계획"
         case .completed:
-            return "📘 완료된 도서 계획"
+            return "📘 완료된 독서 계획"
         }
     }
 }

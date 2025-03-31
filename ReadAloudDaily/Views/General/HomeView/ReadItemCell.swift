@@ -95,14 +95,13 @@ class ReadItemCell: UITableViewCell {
         
         innerStackView.axis = .horizontal
         innerStackView.backgroundColor = .clear
-        innerStackView.spacing = 10
         innerStackView.distribution = .fill
         innerStackView.addArrangedSubview(titleLabel)
         innerStackView.addArrangedSubview(settingButton)
         innerStackView.translatesAutoresizingMaskIntoConstraints = false
         
         totalStackView.axis = .vertical
-        totalStackView.spacing = 10
+        totalStackView.spacing = 5
         totalStackView.distribution = .fill
         totalStackView.alignment = .fill
         totalStackView.addArrangedSubview(innerStackView)
@@ -120,9 +119,12 @@ class ReadItemCell: UITableViewCell {
             totalStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
             totalStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10),
             
+            settingButton.heightAnchor.constraint(equalToConstant: 40),
             settingButton.widthAnchor.constraint(equalToConstant: 40),
             //titleLabel.heightAnchor.constraint(equalToConstant: 40),
             dateLabel.heightAnchor.constraint(equalToConstant: 30),
+            completeLabel.heightAnchor.constraint(equalToConstant: 40),
+            //completeLabel.widthAnchor.constraint(equalToConstant: 280),
             
             startReadButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
             startReadButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10),

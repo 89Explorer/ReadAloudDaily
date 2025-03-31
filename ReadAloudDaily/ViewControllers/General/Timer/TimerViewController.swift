@@ -84,12 +84,33 @@ class TimerViewController: UIViewController {
     
     
     // MARK: - Functions
+//    private func restoreTimerState() {
+//        remainingSeconds = userDefaults.integer(forKey: remainingTimeKey)
+//        timerCounting = userDefaults.bool(forKey: countingKey)
+//        
+//        // 💡 여기가 중요! 복귀 시에도 기준 시간 다시 설정
+//        if let startDate = userDefaults.object(forKey: remainingTimeKey) as? Date {
+//            let elapsed = Int(Date().timeIntervalSince(startDate))
+//            baseRemainingSeconds = remainingSeconds + elapsed
+//        } else {
+//            baseRemainingSeconds = remainingSeconds
+//        }
+//        
+//        updateLabel()
+//    }
+    
     private func restoreTimerState() {
-        remainingSeconds = userDefaults.integer(forKey: remainingTimeKey)
+        // 저장된 시간이 없다면 기본값 설정
+        if userDefaults.object(forKey: remainingTimeKey) == nil {
+            remainingSeconds = Int(readItem.dailyReadingTime)
+            userDefaults.set(remainingSeconds, forKey: remainingTimeKey)
+        } else {
+            remainingSeconds = userDefaults.integer(forKey: remainingTimeKey)
+        }
+        
         timerCounting = userDefaults.bool(forKey: countingKey)
         
-        // 💡 여기가 중요! 복귀 시에도 기준 시간 다시 설정
-        if let startDate = userDefaults.object(forKey: remainingTimeKey) as? Date {
+        if let startDate = userDefaults.object(forKey: startDateKey) as? Date {
             let elapsed = Int(Date().timeIntervalSince(startDate))
             baseRemainingSeconds = remainingSeconds + elapsed
         } else {
@@ -98,6 +119,7 @@ class TimerViewController: UIViewController {
         
         updateLabel()
     }
+
     
     
     private func configure() {
@@ -259,7 +281,7 @@ extension TimerViewController {
         
         titleLabel.font = UIFont(name: "HakgyoansimDunggeunmisoTTF-R", size: 50)
         titleLabel.textColor = .label
-        titleLabel.numberOfLines = 0
+        titleLabel.numberOfLines = 1
         titleLabel.textAlignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
